@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: odoo18_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-odoo_secure_password_2026}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo_pgdata:/var/lib/postgresql/data/pgdata
+    networks:
+      - erp_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-odoo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  odoo:
+    image: odoo:18.0
+    container_name: odoo18_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: db
+      USER: ${POSTGRES_USER:-odoo}
+      PASSWORD: ${POSTGRES_PASSWORD:-odoo_secure_password_2026}
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./config/odoo.conf:/etc/odoo/odoo.conf
+      - ./odoo_addons:/mnt/extra-addons
+    networks:
+      - erp_network
+    # Port 8069 không cần expose ra ngoài internet khi chạy production,
+    # nhưng mở cổng 8069 nội bộ hoặc dev cho FastAPI/Dev kết nối.
+    ports:
+      - "127.0.0.1:8069:8069"
+
+  nginx:
+    image: nginx:alpine
+    container_name: odoo_nginx_proxy
+    restart: unless-stopped
+    depends_on:
+      - odoo
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - erp_network
+
+volumes:
+  odoo_pgdata:
+  odoo_data:
+
+networks:
+  erp_network:
+    driver: bridge
