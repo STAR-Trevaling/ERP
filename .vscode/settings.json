@@ -1,0 +1,27 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/odoo_addons",
+    "${workspaceFolder}/.venv/Lib/site-packages",
+    "${workspaceFolder}/backend/.venv/Lib/site-packages"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/odoo_addons",
+    "${workspaceFolder}/.venv/Lib/site-packages",
+    "${workspaceFolder}/backend/.venv/Lib/site-packages"
+  ],
+  "python.pyrefly.typeCheckingMode": "off",
+  "pyrefly.typeCheckingMode": "off",
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportUnknownMemberType": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportOptionalMemberAccess": "none"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": true
+}

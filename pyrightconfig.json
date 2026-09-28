@@ -1,0 +1,14 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": [
+    "backend",
+    "odoo_addons"
+  ],
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportAttributeAccessIssue": false,
+  "reportUnknownMemberType": false,
+  "reportGeneralTypeIssues": false,
+  "reportOptionalMemberAccess": false
+}
