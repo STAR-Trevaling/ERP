@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- 1. Thuộc tính Màu Sắc (Color) -->
+        <record id="product_attribute_color" model="product.attribute">
+            <field name="name">Màu sắc</field>
+            <field name="display_type">color</field>
+            <field name="create_variant">always</field>
+        </record>
+
+        <record id="product_attribute_value_color_black" model="product.attribute.value">
+            <field name="name">Đen</field>
+            <field name="attribute_id" ref="product_attribute_color"/>
+            <field name="html_color">#000000</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="product_attribute_value_color_white" model="product.attribute.value">
+            <field name="name">Trắng</field>
+            <field name="attribute_id" ref="product_attribute_color"/>
+            <field name="html_color">#FFFFFF</field>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="product_attribute_value_color_navy" model="product.attribute.value">
+            <field name="name">Xanh Navy</field>
+            <field name="attribute_id" ref="product_attribute_color"/>
+            <field name="html_color">#000080</field>
+            <field name="sequence">3</field>
+        </record>
+
+        <!-- 2. Thuộc tính Kích Thước (Size) -->
+        <record id="product_attribute_size" model="product.attribute">
+            <field name="name">Kích thước</field>
+            <field name="display_type">select</field>
+            <field name="create_variant">always</field>
+        </record>
+
+        <record id="product_attribute_value_size_s" model="product.attribute.value">
+            <field name="name">S</field>
+            <field name="attribute_id" ref="product_attribute_size"/>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="product_attribute_value_size_m" model="product.attribute.value">
+            <field name="name">M</field>
+            <field name="attribute_id" ref="product_attribute_size"/>
+            <field name="sequence">2</field>
+        </record>
+
+        <record id="product_attribute_value_size_l" model="product.attribute.value">
+            <field name="name">L</field>
+            <field name="attribute_id" ref="product_attribute_size"/>
+            <field name="sequence">3</field>
+        </record>
+
+        <record id="product_attribute_value_size_xl" model="product.attribute.value">
+            <field name="name">XL</field>
+            <field name="attribute_id" ref="product_attribute_size"/>
+            <field name="sequence">4</field>
+        </record>
+
+        <!-- 3. Sản phẩm mẫu: Áo Polo Nam Pima Cotton -->
+        <record id="product_template_polo_pima" model="product.template">
+            <field name="name">Áo Polo Nam Pima Cotton Cao Cấp</field>
+            <field name="detailed_type">product</field>
+            <field name="list_price">450000.0</field>
+            <field name="standard_price">210000.0</field>
+            <field name="default_code">POLO-PIMA</field>
+            <field name="description_sale">Áo Polo chất liệu Pima Cotton thoáng khí, phom dáng Regular Fit chuẩn quý ông hiện đại.</field>
+        </record>
+
+        <!-- Gán thuộc tính Màu Sắc vào Áo Polo -->
+        <record id="product_template_attribute_line_color" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="product_template_polo_pima"/>
+            <field name="attribute_id" ref="product_attribute_color"/>
+            <field name="value_ids" eval="[(6, 0, [
+                ref('product_attribute_value_color_black'),
+                ref('product_attribute_value_color_white'),
+                ref('product_attribute_value_color_navy')
+            ])]"/>
+        </record>
+
+        <!-- Gán thuộc tính Kích Thước vào Áo Polo -->
+        <record id="product_template_attribute_line_size" model="product.template.attribute.line">
+            <field name="product_tmpl_id" ref="product_template_polo_pima"/>
+            <field name="attribute_id" ref="product_attribute_size"/>
+            <field name="value_ids" eval="[(6, 0, [
+                ref('product_attribute_value_size_s'),
+                ref('product_attribute_value_size_m'),
+                ref('product_attribute_value_size_l'),
+                ref('product_attribute_value_size_xl')
+            ])]"/>
+        </record>
+    </data>
+</odoo>
