@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- 1. Kho Tổng Phân Phối (Central DC - Priority 1, Buffer 0) -->
+        <record id="stock_location_central_dc" model="stock.location">
+            <field name="name">Kho Tổng Phân Phối (Central DC)</field>
+            <field name="usage">internal</field>
+            <field name="location_id" ref="stock.stock_location_locations"/>
+            <field name="warehouse_type">central_dc</field>
+            <field name="is_omnichannel_enabled">True</field>
+            <field name="safety_stock_buffer">0.0</field>
+            <field name="allocation_priority">1</field>
+        </record>
+
+        <!-- 2. Cửa hàng Bán Lẻ Hà Nội (Retail Store HN - Priority 10, Buffer 2.0) -->
+        <record id="stock_location_store_hn" model="stock.location">
+            <field name="name">Cửa hàng Bán lẻ Hà Nội (Store HN)</field>
+            <field name="usage">internal</field>
+            <field name="location_id" ref="stock.stock_location_locations"/>
+            <field name="warehouse_type">retail_store</field>
+            <field name="is_omnichannel_enabled">True</field>
+            <field name="safety_stock_buffer">2.0</field>
+            <field name="allocation_priority">10</field>
+        </record>
+
+        <!-- 3. Cửa hàng Bán Lẻ TP.HCM (Retail Store HCM - Priority 10, Buffer 2.0) -->
+        <record id="stock_location_store_hcm" model="stock.location">
+            <field name="name">Cửa hàng Bán lẻ TP.HCM (Store HCM)</field>
+            <field name="usage">internal</field>
+            <field name="location_id" ref="stock.stock_location_locations"/>
+            <field name="warehouse_type">retail_store</field>
+            <field name="is_omnichannel_enabled">True</field>
+            <field name="safety_stock_buffer">2.0</field>
+            <field name="allocation_priority">10</field>
+        </record>
+    </data>
+</odoo>
