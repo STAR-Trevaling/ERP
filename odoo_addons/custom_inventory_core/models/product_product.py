@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from typing import Optional
 from odoo import models, api
 import logging
 
@@ -9,7 +9,7 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     @api.model
-    def action_get_omnichannel_stock(self, sku: str, mode: str = 'online', location_id: int = None):
+    def action_get_omnichannel_stock(self, sku: str, mode: str = 'online', location_id: Optional[int] = None):
         """
         API JSON-RPC phục vụ Backend Middleware & POS:
         Hỗ trợ đa chế độ nghiệp vụ (Multi-Mode Strategy):
@@ -40,26 +40,37 @@ class ProductProduct(models.Model):
 
         quants = self.env['stock.quant'].search(domain)
 
-        stock_data = []
+        # Gom nhóm quants theo location_id để tránh trùng lặp địa điểm khi có nhiều lô/records
+        location_data = {}
+        on_hand_map = {}
+        reserved_map = {}
         for q in quants:
-            loc = q.location_id
-            free_qty = max(0.0, q.quantity - q.reserved_quantity)
+            lid = int(q.location_id.id)
+            location_data[lid] = q.location_id
+            on_hand_map[lid] = on_hand_map.get(lid, 0.0) + float(q.quantity or 0.0)
+            reserved_map[lid] = reserved_map.get(lid, 0.0) + float(q.reserved_quantity or 0.0)
+
+        stock_data = []
+        for lid, loc in location_data.items():
+            on_hand = on_hand_map.get(lid, 0.0)
+            reserved = reserved_map.get(lid, 0.0)
+            free_qty = max(0.0, on_hand - reserved)
 
             # Tính toán lượng khả dụng theo mode
             if mode == 'pos':
                 # Tại quầy POS: Nếu là chính cửa hàng hiện tại, được bán hết (buffer = 0)
                 is_current_pos = bool(location_id and loc.id == location_id)
-                buffer = 0.0 if is_current_pos else (loc.safety_stock_buffer or 0.0)
-                priority = 0 if is_current_pos else (loc.allocation_priority or 10)
+                buffer = 0.0 if is_current_pos else float(loc.safety_stock_buffer or 0.0)
+                priority = 0 if is_current_pos else int(loc.allocation_priority or 10)
             elif mode == 'online':
-                buffer = loc.safety_stock_buffer or 0.0
-                priority = loc.allocation_priority or 10
+                buffer = float(loc.safety_stock_buffer or 0.0)
+                priority = int(loc.allocation_priority or 10)
             elif mode == 'b2b':
                 buffer = 0.0
                 priority = 1
             else:  # 'audit'
                 buffer = 0.0
-                priority = loc.id
+                priority = int(loc.id)
 
             avail_qty = max(0.0, free_qty - buffer)
 
@@ -70,17 +81,17 @@ class ProductProduct(models.Model):
                 'warehouse_type': loc.warehouse_type or 'retail_store',
                 'priority': priority,
                 'safety_stock_buffer': buffer,
-                'on_hand_qty': q.quantity,
-                'reserved_qty': q.reserved_quantity,
+                'on_hand_qty': on_hand,
+                'reserved_qty': reserved,
                 'free_qty': free_qty,
                 'available_qty': avail_qty,
                 'available_for_online': avail_qty,  # Backward compatibility
             })
 
         # Sắp xếp: Kho ưu tiên nhỏ nhất trước, sau đó đến available_qty giảm dần
-        stock_data.sort(key=lambda x: (x['priority'], -x['available_qty']))
+        stock_data.sort(key=lambda x: (int(x['priority']), -float(x['available_qty'])))
 
-        total_avail = sum(item['available_qty'] for item in stock_data)
+        total_avail = sum(float(item['available_qty']) for item in stock_data)
 
         return {
             'status': 'success',

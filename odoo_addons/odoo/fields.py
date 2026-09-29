@@ -38,11 +38,33 @@ class Html(Field):
 
 
 class Date(Field):
-    pass
+    @classmethod
+    def today(cls, *args: Any) -> Any:
+        from datetime import date
+        return date.today()
+
+    @classmethod
+    def to_string(cls, value: Any) -> Optional[str]:
+        return str(value) if value else None
+
+    @classmethod
+    def to_date(cls, value: Any) -> Any:
+        return value
 
 
 class Datetime(Field):
-    pass
+    @classmethod
+    def now(cls, *args: Any) -> Any:
+        from datetime import datetime
+        return datetime.now()
+
+    @classmethod
+    def to_string(cls, value: Any) -> Optional[str]:
+        return str(value) if value else None
+
+    @classmethod
+    def to_datetime(cls, value: Any) -> Any:
+        return value
 
 
 class Binary(Field):

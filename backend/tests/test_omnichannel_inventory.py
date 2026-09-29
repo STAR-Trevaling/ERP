@@ -58,7 +58,7 @@ def test_allocation_priority_central_dc(central_warehouse, store_q1):
     assert len(plan.items) == 1
     assert plan.items[0].location.id == central_warehouse.id
     assert plan.items[0].allocated_qty == 5.0
-    assert "Kho Tổng" in plan.notes
+    assert plan.notes is not None and "Kho Tổng" in plan.notes
 
 
 def test_allocation_fallback_to_store_when_dc_empty(central_warehouse, store_q1):
@@ -75,7 +75,7 @@ def test_allocation_fallback_to_store_when_dc_empty(central_warehouse, store_q1)
     assert len(plan.items) == 1
     assert plan.items[0].location.id == store_q1.id
     assert plan.items[0].allocated_qty == 8.0
-    assert "Cửa hàng Quận 1" in plan.notes
+    assert plan.notes is not None and "Cửa hàng Quận 1" in plan.notes
 
 
 def test_safety_stock_buffer_protection(central_warehouse, store_q1):

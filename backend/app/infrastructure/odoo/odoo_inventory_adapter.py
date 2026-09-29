@@ -146,10 +146,19 @@ class OdooInventoryAdapter(IInventoryRepository):
     async def release_allocation(self, plan: AllocationPlan, reference: str) -> bool:
         """Gọi Odoo RPC để nhả giữ chỗ tồn kho"""
         try:
+            release_payload = [
+                {
+                    "sku": str(item.sku),
+                    "location_id": item.location.id,
+                    "qty": item.allocated_qty,
+                    "reference": reference
+                }
+                for item in plan.items
+            ]
             res = await self.odoo.execute_kw(
                 model="stock.quant",
                 method="action_omnichannel_release_stock",
-                args=[reference]
+                args=[release_payload]
             )
             return bool(res and res.get("status") == "success")
         except Exception as e:

@@ -110,13 +110,25 @@ class SaleOrder(models.Model):
                     'message': f"Không tìm thấy sản phẩm có SKU: {sku}"
                 }
 
-            # Kiểm tra tồn kho khả dụng (free_qty = qty_available - outgoing_qty)
-            free_qty = getattr(product, 'free_qty', product.qty_available - product.outgoing_qty)
+            # Kiểm tra tồn kho khả dụng (ưu tiên Omnichannel Core nếu đã cài đặt)
+            free_qty = 0.0
+            if hasattr(product, 'action_get_omnichannel_stock'):
+                try:
+                    omni_res = product.action_get_omnichannel_stock(sku, mode='online')
+                    if omni_res.get('status') == 'success':
+                        free_qty = float(omni_res.get('total_available_qty', 0.0))
+                    else:
+                        free_qty = getattr(product, 'free_qty', product.qty_available - product.outgoing_qty)
+                except Exception:
+                    free_qty = getattr(product, 'free_qty', product.qty_available - product.outgoing_qty)
+            else:
+                free_qty = getattr(product, 'free_qty', product.qty_available - product.outgoing_qty)
+
             if free_qty < qty:
                 return {
                     'status': 'error',
                     'code': 'INSUFFICIENT_STOCK',
-                    'message': f"Sản phẩm {product.name} ({sku}) không đủ tồn kho. Yêu cầu: {qty}, Khả dụng: {free_qty}"
+                    'message': f"Sản phẩm {product.name} ({sku}) không đủ tồn kho khả dụng online. Yêu cầu: {qty}, Khả dụng: {free_qty}"
                 }
 
             order_lines.append((0, 0, {
@@ -138,6 +150,9 @@ class SaleOrder(models.Model):
                 'gateway_name': order_data.get('payment_method', ''),
                 'order_line': order_lines,
             }
+            if order_data.get('warehouse_id'):
+                order_vals['warehouse_id'] = order_data['warehouse_id']
+
             order = self.create(order_vals)
 
             # Confirm order để Odoo tự động khóa tồn kho (Reserved Quantities)
@@ -167,7 +182,8 @@ class SaleOrder(models.Model):
         """
         Xác nhận thanh toán từ Webhook:
         - Chuyển trạng thái đơn sang 'paid'
-        - Tạo Hóa đơn (Account Move) & Post hóa đơn
+        - Tạo Hóa đơn (Account Move) & Post hóa đơn (nếu chính sách xuất hóa đơn cho phép)
+        - Nếu chính sách xuất hóa đơn theo giao hàng (Delivered quantities), tạo bút toán Khách trả trước (Prepayment)
         - Ghi nhận Payment vào đúng Payment Journal tương ứng của cổng thanh toán
         """
         odoo_order_id = payment_data.get('odoo_order_id')
@@ -191,16 +207,16 @@ class SaleOrder(models.Model):
                 'gateway_transaction_id': gateway_trans_id,
             })
 
-            # 2. Tạo Hóa đơn (Customer Invoice)
-            invoices = order._create_invoices()
-            for inv in invoices:
-                inv.action_post()
-
-            # 3. Ghi nhận thanh toán vào Payment Journal riêng của cổng
+            # 2. Xác định Payment Journal riêng của cổng
             journal = self.env['account.journal'].search([('code', '=', journal_code)], limit=1)
             if not journal:
                 # Fallback về journal loại bank mặc định
                 journal = self.env['account.journal'].search([('type', '=', 'bank')], limit=1)
+
+            # 3. Tạo Hóa đơn (Customer Invoice) nếu chính sách cho phép xuất ngay
+            invoices = order._create_invoices()
+            for inv in invoices:
+                inv.action_post()
 
             if invoices and journal:
                 payment_register = self.env['account.payment.register'].with_context(
@@ -212,6 +228,20 @@ class SaleOrder(models.Model):
                     'communication': f"{order.name} - {gateway_trans_id}",
                 })
                 payment_register._create_payments()
+                _logger.info(f"[ECOM-BRIDGE] Invoice & Payment registered for {order.name} via {journal_code}")
+            elif not invoices and journal:
+                # Trường hợp hàng giao sau (Delivered quantities): Ghi nhận bút toán Khách hàng trả trước (Prepayment Nợ 112 / Có 131)
+                prepayment_vals = {
+                    'payment_type': 'inbound',
+                    'partner_type': 'customer',
+                    'partner_id': order.partner_id.id,
+                    'amount': amount_paid or order.amount_total,
+                    'journal_id': journal.id,
+                    'ref': f"{order.name} - {gateway_trans_id} (Tra truoc)",
+                }
+                prepayment = self.env['account.payment'].create(prepayment_vals)
+                prepayment.action_post()
+                _logger.info(f"[ECOM-BRIDGE] Prepayment recorded for {order.name} via {journal_code} (Invoicing delayed until delivery)")
 
             _logger.info(f"[ECOM-BRIDGE] Payment captured for {order.name} via {journal_code} (Trans: {gateway_trans_id})")
             return {
