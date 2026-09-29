@@ -1,13 +1,13 @@
 import hmac
 import hashlib
 import urllib.parse
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from app.core.config import settings
 
 
 class PaymentSignatureVerifier:
     @staticmethod
-    def verify_vnpay_signature(params: Dict[str, Any], secret_key: str = None) -> bool:
+    def verify_vnpay_signature(params: Dict[str, Any], secret_key: Optional[str] = None) -> bool:
         """
         Verify chữ ký HMAC-SHA512 của VNPay:
         1. Lọc bỏ vnp_SecureHash và vnp_SecureHashType
@@ -39,7 +39,7 @@ class PaymentSignatureVerifier:
         return hmac.compare_digest(calculated_hash.lower(), vnp_secure_hash.lower())
 
     @staticmethod
-    def verify_momo_signature(params: Dict[str, Any], secret_key: str = None) -> bool:
+    def verify_momo_signature(params: Dict[str, Any], secret_key: Optional[str] = None) -> bool:
         """
         Verify chữ ký HMAC-SHA256 của MoMo:
         Chuỗi ký chuẩn: accessKey={}&amount={}&extraData={}&message={}&orderId={}&orderInfo={}&orderType={}&partnerCode={}&payType={}&requestId={}&responseTime={}&resultCode={}&transId={}

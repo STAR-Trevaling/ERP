@@ -82,12 +82,57 @@ class StockQuant(models.Model):
             }
 
     @api.model
-    def action_omnichannel_release_stock(self, reference):
+    def action_omnichannel_release_stock(self, payload_or_ref):
         """
-        API JSON-RPC Giải phóng tồn giữ khi đơn hàng bị hủy hoặc hết hạn thanh toán
+        API JSON-RPC Giải phóng tồn giữ khi đơn hàng bị hủy hoặc hết hạn thanh toán.
+        Hỗ trợ:
+        - payload là list of dict: [{"sku": str, "location_id": int, "qty": float, "reference": str}]
+        - hoặc reference là str
         """
-        _logger.info(f"[OMNICHANNEL-RELEASE] Giải phóng giữ tồn cho mã tham chiếu {reference}")
+        if isinstance(payload_or_ref, list):
+            try:
+                released_records = []
+                for item in payload_or_ref:
+                    sku = item.get('sku')
+                    location_id = item.get('location_id')
+                    qty = float(item.get('qty', 0.0))
+                    reference = item.get('reference', '')
+
+                    if qty <= 0:
+                        continue
+
+                    product = self.env['product.product'].search([('default_code', '=', sku)], limit=1)
+                    if not product:
+                        continue
+
+                    quant = self.search([
+                        ('product_id', '=', product.id),
+                        ('location_id', '=', location_id)
+                    ], limit=1)
+
+                    if quant:
+                        quant.reserved_quantity = max(0.0, quant.reserved_quantity - qty)
+                        released_records.append({
+                            'quant_id': quant.id,
+                            'sku': sku,
+                            'location_id': location_id,
+                            'qty_released': qty,
+                            'reference': reference
+                        })
+
+                _logger.info(f"[OMNICHANNEL-RELEASE] Released stock quants: {released_records}")
+                return {
+                    'status': 'success',
+                    'message': 'Đã giải phóng lượng tồn kho giữ chỗ thành công',
+                    'released': released_records
+                }
+            except Exception as e:
+                self.env.cr.rollback()
+                _logger.error(f"[OMNICHANNEL-RELEASE] Lỗi giải phóng tồn: {str(e)}")
+                return {'status': 'error', 'message': str(e)}
+
+        _logger.info(f"[OMNICHANNEL-RELEASE] Giải phóng giữ tồn cho mã tham chiếu {payload_or_ref}")
         return {
             'status': 'success',
-            'message': f'Đã giải phóng giữ tồn cho {reference}'
+            'message': f'Đã giải phóng giữ tồn cho {payload_or_ref}'
         }

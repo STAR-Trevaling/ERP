@@ -109,7 +109,7 @@ async def vnpay_ipn_webhook(
     order_ref = params.get("vnp_TxnRef", "")
     trans_no = params.get("vnp_TransactionNo", "")
     response_code = params.get("vnp_ResponseCode", "")
-    raw_amount = float(params.get("vnp_Amount", "0")) / 100.0  # VNPay nhân 100
+    raw_amount = float(str(params.get("vnp_Amount", "0"))) / 100.0  # VNPay nhân 100
 
     # 2. Kiểm tra Idempotency
     stmt = select(PaymentTransactionRecord).where(
@@ -134,9 +134,14 @@ async def vnpay_ipn_webhook(
         signature_verified=True,
         raw_payload=json.dumps(params)
     )
-    db.add(tx_record)
-    await db.commit()
-    await db.refresh(tx_record)
+    try:
+        db.add(tx_record)
+        await db.commit()
+        await db.refresh(tx_record)
+    except Exception:
+        await db.rollback()
+        logger.info(f"[VNPAY-WEBHOOK] Concurrent duplicate transaction {trans_no} caught.")
+        return {"RspCode": "02", "Message": "Order already confirmed"}
 
     # 4. Nếu thanh toán thành công -> Đẩy vào BackgroundTasks để đồng bộ Odoo
     if is_success:
@@ -166,7 +171,7 @@ async def momo_ipn_webhook(
     order_ref = payload.get("orderId", "")
     trans_id = str(payload.get("transId", ""))
     result_code = payload.get("resultCode", -1)
-    amount = float(payload.get("amount", 0))
+    amount = float(str(payload.get("amount", 0)))
 
     # 2. Kiểm tra Idempotency
     stmt = select(PaymentTransactionRecord).where(
@@ -191,9 +196,14 @@ async def momo_ipn_webhook(
         signature_verified=True,
         raw_payload=json.dumps(payload)
     )
-    db.add(tx_record)
-    await db.commit()
-    await db.refresh(tx_record)
+    try:
+        db.add(tx_record)
+        await db.commit()
+        await db.refresh(tx_record)
+    except Exception:
+        await db.rollback()
+        logger.info(f"[MOMO-WEBHOOK] Concurrent duplicate transaction {trans_id} caught.")
+        return {"resultCode": 0, "message": "Order already confirmed"}
 
     # 4. Chạy background task
     if is_success:

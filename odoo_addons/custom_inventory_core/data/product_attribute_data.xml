@@ -63,7 +63,8 @@
         <!-- 3. Sản phẩm mẫu: Áo Polo Nam Pima Cotton -->
         <record id="product_template_polo_pima" model="product.template">
             <field name="name">Áo Polo Nam Pima Cotton Cao Cấp</field>
-            <field name="detailed_type">product</field>
+            <field name="type">consu</field>
+            <field name="is_storable" eval="True"/>
             <field name="list_price">450000.0</field>
             <field name="standard_price">210000.0</field>
             <field name="default_code">POLO-PIMA</field>
