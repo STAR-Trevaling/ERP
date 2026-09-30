@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_location_form_inherit_retail" model="ir.ui.view">
+        <field name="name">stock.location.form.inherit.retail</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='additional_info']" position="after">
+                <group name="retail_config" string="Cấu hình Bán lẻ Đa kênh (Omnichannel Retail)">
+                    <field name="is_retail_store"/>
+                    <field name="safety_buffer_pct" invisible="not is_retail_store"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
