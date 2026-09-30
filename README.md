@@ -1,92 +1,40 @@
-# RETAIL ERP & E-COMMERCE INTEGRATION SYSTEM
+# ODOO 18 RETAIL ERP SYSTEM
 
-Hệ thống ERP bán lẻ đa kênh chuẩn nghiệp vụ Việt Nam tích hợp giữa **Website E-Commerce**, **FastAPI Middleware** và **Odoo 18 Core ERP**.
-
----
-
-## 1. TỔNG QUAN DEPENDENCIES & MÔI TRƯỜNG (ENV)
-
-Hệ thống đã được thiết lập đầy đủ 100% các biến môi trường và gói phụ thuộc:
-
-### A. File cấu hình môi trường (.env)
-- **[.env (Root)](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/new%20pj/.env)**: Cấu hình chung cho Docker Compose, Odoo, PostgreSQL, và đường dẫn `PYTHONPATH`.
-- **[backend/.env](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/new%20pj/backend/.env)**: Cấu hình FastAPI Middleware, Odoo JSON-RPC credentials, cổng thanh toán VNPay / MoMo và SQLite/PostgreSQL Database URL.
-- **[frontend/.env](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/new%20pj/frontend/.env)**: Cấu hình `VITE_API_BASE_URL=http://localhost:8000/api/v1`.
-- **[.env.example](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/new%20pj/.env.example)**: File mẫu tham chiếu khi bàn giao môi trường Production.
-
-### B. Dependencies Backend (Python 3.12 - 3.14)
-Nằm trong `backend/requirements.txt` và đã cài đặt sẵn trong virtualenv `.venv`:
-- `fastapi` & `uvicorn[standard]`: Async Web Framework & ASGI Server.
-- `pydantic` & `pydantic-settings`: Validate data contracts & quản lý biến môi trường.
-- `httpx`: Non-blocking HTTP client gọi JSON-RPC sang Odoo 18.
-- `sqlalchemy` & `greenlet` & `aiosqlite`: ORM AsyncIO lưu vết Idempotency & Webhook IPN logs.
-- `pytest` & `pytest-asyncio`: Bộ kiểm thử tự động TDD (7/7 tests passed).
-
-### C. Dependencies Frontend (ReactJS + TypeScript)
-Nằm trong `frontend/package.json` và đã cài đặt sẵn trong `frontend/node_modules`:
-- `react` & `react-dom` (v18)
-- `lucide-react`: Bộ icon hiện đại.
-- `vite` & `@vitejs/plugin-react`: Bundler tốc độ cao.
-- `typescript`: Kiểm tra kiểu tĩnh (0 errors).
-
-### D. Hạ tầng Odoo 18 (Docker)
-- `odoo:18.0` (Multi-workers).
-- `postgres:16-alpine`.
-- `nginx:alpine` (Reverse Proxy, SSL, Rate limiting).
-- Addon: `custom_ecommerce_bridge` (Atomic Order & Stock Lock).
+Hệ thống ERP Quản trị Bán lẻ & Thương mại Đa kênh xây dựng trực tiếp trên nền tảng **Odoo 18 Chính Thống** (Official Odoo 18 Community / Enterprise).
 
 ---
 
-## 2. HƯỚNG DẪN KHỞI CHẠY (QUICK START)
+## 1. HẠ TẦNG & DỊCH VỤ
 
-### Bước 1: Khởi động Odoo 18 & Database
+Dự án sử dụng Docker theo chuẩn tài liệu chính thức của Odoo (Official Odoo Docker Setup):
+
+* **Odoo Version**: `odoo:18.0`
+* **PostgreSQL Database**: `postgres:16-alpine`
+* **Cấu hình Odoo**: [config/odoo.conf](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/new%20pj/config/odoo.conf)
+* **Thư mục Addons tùy biến**: [odoo_addons/](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/new%20pj/odoo_addons) (được mount trực tiếp vào container tại `/mnt/extra-addons`)
+
+---
+
+## 2. KHỞI CHẠY HỆ THỐNG
+
+### Bước 1: Khởi động container Odoo & Database
 ```bash
 docker compose up -d
 ```
-*Truy cập `http://localhost:8069`, vào Apps bật Developer Mode, nhấn **Update Apps List** và cài đặt module `custom_ecommerce_bridge`.*
 
-### Bước 2: Khởi chạy FastAPI Middleware (Port 8000)
-```bash
-cd backend
-.\.venv\Scripts\uvicorn app.main:app --reload --port 8000
-```
-*Tài liệu Swagger UI tương tác trực tiếp tại: `http://localhost:8000/docs`*
-
-### Bước 3: Khởi chạy Frontend ReactJS (Port 5173)
-```bash
-cd frontend
-npm run dev
-```
-*Truy cập giao diện đặt hàng tại: `http://localhost:5173`*
-
-### Bước 4: Chạy kiểm thử tự động (TDD Suite)
-```bash
-.\.venv\Scripts\pytest -v backend
-```
+### Bước 2: Truy cập ứng dụng
+* **URL**: [http://localhost:8069](http://localhost:8069)
+* **Database**: `odoo_retail`
+* **Admin Login**: `admin`
+* **Admin Password**: `admin`
+* **Master Password**: `admin_master_secret_2026`
 
 ---
 
-## 3. CẤU TRÚC THƯ MỤC DỰ ÁN
+## 3. CÁCH TẠO MODULE TÙY BIẾN THEO CHUẨN ODOO (SCAFFOLD)
 
-```text
-new pj/
-├── .env                              # Biến môi trường tổng thể
-├── docker-compose.yml                # Odoo 18 + Postgres + Nginx
-├── config/
-│   ├── odoo.conf                     # Cấu hình Odoo multi-workers
-│   └── nginx/nginx.conf              # Nginx reverse proxy & rate limit
-├── odoo_addons/
-│   └── custom_ecommerce_bridge/      # Thin Addon Odoo 18 (Atomic Stock Lock)
-├── backend/
-│   ├── .env                          # Biến môi trường FastAPI
-│   ├── requirements.txt              # Dependencies Python
-│   ├── app/                          # Source code FastAPI
-│   └── tests/                        # 7 TDD Test Cases
-├── frontend/
-│   ├── .env                          # Biến môi trường Vite
-│   ├── package.json                  # Dependencies React TS
-│   └── src/                          # Checkout Portal & Hold Timer
-├── RECONCILIATION.md                 # Quy trình đối soát 3 bên & VAS
-├── PROJECT_PLAN.md                   # Tiến độ triển khai 5 Phase
-└── HANDOFF.md                        # Tài liệu bàn giao kỹ thuật
+Để khởi tạo module mới theo đúng chuẩn Odoo Developer Docs:
+```bash
+docker compose exec odoo odoo scaffold <ten_module> /mnt/extra-addons
 ```
+Module sẽ tự động được sinh ra trong thư mục `odoo_addons/` với đầy đủ cấu trúc: `models/`, `views/`, `controllers/`, `security/`, `__manifest__.py`.
