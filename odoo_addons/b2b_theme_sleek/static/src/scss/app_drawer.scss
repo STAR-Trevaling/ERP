@@ -1,68 +1,69 @@
 /* ==========================================================================
-   THEME B2B SLEEK - APPS DRAWER & RESPONSIVE POLISH (WEB_RESPONSIVE ENHANCEMENT)
+   THEME B2B SLEEK - APPS DRAWER (KELVIQ CLEAN LIGHT AESTHETIC)
    ========================================================================== */
 
-/* Apps Menu Overlay */
+/* Light Frosted Backdrop for Apps Menu */
 .o_apps_menu {
-  background: rgba(15, 23, 42, 0.92) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  transition: opacity 0.25s var(--b2b-ease) !important;
+  background: rgba(245, 246, 248, 0.96) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  transition: opacity var(--av-duration) var(--av-ease) !important;
 
   /* App Icons Grid */
   .o_app {
-    border-radius: var(--b2b-radius) !important;
+    border-radius: var(--av-r-lg) !important;
     padding: 1.25rem 1rem !important;
-    transition: all 0.2s var(--b2b-ease) !important;
+    transition: all var(--av-duration) var(--av-ease) !important;
 
     img {
-      border-radius: 12px !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-      transition: transform 0.25s var(--b2b-ease), box-shadow 0.25s var(--b2b-ease) !important;
+      border-radius: 16px !important;
+      box-shadow: var(--av-shadow) !important;
+      transition: transform 0.2s var(--av-ease), box-shadow 0.2s var(--av-ease) !important;
     }
 
     .o_caption {
-      color: #f1f5f9 !important;
-      font-weight: 500 !important;
-      font-size: 0.875rem !important;
+      color: var(--av-text) !important;
+      font-weight: 600 !important;
+      font-size: 0.9rem !important;
       margin-top: 0.75rem !important;
-      letter-spacing: 0.01em !important;
+      letter-spacing: -0.01em !important;
     }
 
     &:hover, &:focus {
-      background: rgba(255, 255, 255, 0.08) !important;
+      background: var(--av-surface) !important;
+      box-shadow: var(--av-shadow-md) !important;
       transform: translateY(-4px) !important;
 
       img {
-        transform: scale(1.08) !important;
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35) !important;
+        transform: scale(1.06) !important;
+        box-shadow: 0 8px 20px rgba(224, 83, 56, 0.2) !important;
       }
 
       .o_caption {
-        color: #ffffff !important;
+        color: var(--av-primary) !important;
       }
     }
   }
 
-  /* App Drawer Search Input */
+  /* App Drawer Search Input (Pill Shape) */
   .form-control, input[type="search"] {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: var(--b2b-radius-full) !important;
-    color: #ffffff !important;
-    padding: 0.75rem 1.5rem !important;
+    background: var(--av-surface) !important;
+    border: 1.5px solid var(--av-border) !important;
+    border-radius: var(--av-r-full) !important;
+    color: var(--av-text) !important;
+    padding: 0.85rem 1.75rem !important;
     font-size: 1.05rem !important;
-    backdrop-filter: blur(8px) !important;
-    transition: all 0.2s var(--b2b-ease) !important;
+    box-shadow: var(--av-shadow) !important;
+    transition: all var(--av-duration) var(--av-ease) !important;
 
     &::placeholder {
-      color: #94a3b8 !important;
+      color: var(--av-text-light) !important;
     }
 
     &:focus {
-      background: rgba(255, 255, 255, 0.16) !important;
-      border-color: #818cf8 !important;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25) !important;
+      background: var(--av-surface) !important;
+      border-color: var(--av-primary) !important;
+      box-shadow: 0 0 0 4px var(--av-primary-glow) !important;
       outline: none !important;
     }
   }

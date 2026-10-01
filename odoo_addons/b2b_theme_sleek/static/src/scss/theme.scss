@@ -1,103 +1,132 @@
 /* ==========================================================================
-   THEME B2B SLEEK - CORE STYLES (PREMIUM CLEAN MONOLITH)
+   THEME B2B SLEEK - KELVIQ BENTO GRID STYLING
+   Aesthetic: Clean White Surfaces, Terracotta Coral Accents & Rounded Pills
    ========================================================================== */
 
-/* 1. Global Typography & Base */
+/* 1. Global Typography & Canvas */
 body, .o_web_client {
   font-family: var(--font-sans) !important;
-  color: #1e293b;
-  background-color: var(--b2b-bg) !important;
+  color: var(--av-text) !important;
+  background-color: var(--av-bg) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Monospace for Codes, Barcodes, Lots, Quantities, and References */
+/* Number fields & tabular data */
 .o_list_number,
 .o_field_monetary,
 .o_field_float,
 .o_field_integer,
 [name="default_code"],
 [name="barcode"],
-[name="lot_id"],
-[name="name"].o_field_char {
+[name="lot_id"] {
+  font-family: var(--font-mono) !important;
   font-feature-settings: "tnum" 1;
 }
 
-/* 2. Top Navigation Bar */
+/* 2. Top Navigation Bar (Kelviq Clean Light Header) */
 .o_main_navbar {
-  background-color: #0f172a !important; /* Premium Slate 900 */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
-  height: 48px !important;
+  background-color: var(--av-surface) !important;
+  border-bottom: 1px solid var(--av-border) !important;
+  box-shadow: var(--av-shadow-sm) !important;
+  height: 52px !important;
+  padding: 0 1rem !important;
 
   .o_menu_brand {
     font-weight: 700 !important;
     letter-spacing: -0.02em !important;
-    color: #f8fafc !important;
-    font-size: 1.05rem !important;
+    color: var(--av-text) !important;
+    font-size: 1.1rem !important;
   }
 
+  /* Navigation Items as Soft Pills */
   .o_nav_entry, .nav-link {
-    color: #94a3b8 !important;
+    color: var(--av-text-muted) !important;
     font-weight: 500 !important;
     font-size: 0.875rem !important;
-    border-radius: var(--b2b-radius-sm) !important;
-    transition: all var(--b2b-duration) var(--b2b-ease) !important;
+    border-radius: var(--av-r-md) !important;
+    padding: 0.4rem 0.75rem !important;
+    margin: 0 0.15rem !important;
+    transition: all var(--av-duration) var(--av-ease) !important;
 
-    &:hover, &:focus, &.active {
-      color: #ffffff !important;
-      background-color: rgba(255, 255, 255, 0.08) !important;
+    &:hover, &:focus {
+      color: var(--av-primary) !important;
+      background-color: var(--av-bg) !important;
+    }
+
+    &.active {
+      color: var(--av-primary) !important;
+      background-color: var(--av-primary-light) !important;
+      font-weight: 600 !important;
     }
   }
 
-  /* User Avatar & Menu */
+  /* User Profile & Systray Icons */
   .o_user_avatar {
-    border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: var(--av-r-full) !important;
+    border: 1.5px solid var(--av-border) !important;
+  }
+
+  .o_menu_systray {
+    i, .fa {
+      color: var(--av-text-muted) !important;
+      transition: color var(--av-duration) var(--av-ease) !important;
+      &:hover {
+        color: var(--av-primary) !important;
+      }
+    }
+
+    /* Notification Counter Badge */
+    .badge {
+      background-color: var(--av-primary) !important;
+      color: #ffffff !important;
+    }
   }
 }
 
-/* 3. Control Panel & Breadcrumbs */
+/* 3. Control Panel & Large Section Heading */
 .o_control_panel {
-  background-color: var(--b2b-surface) !important;
-  border-bottom: 1px solid var(--b2b-border) !important;
-  padding: 1rem 1.5rem !important;
-  box-shadow: var(--b2b-shadow-sm) !important;
+  background-color: var(--av-surface) !important;
+  border-bottom: 1px solid var(--av-border) !important;
+  padding: 1.15rem 1.75rem !important;
+  box-shadow: var(--av-shadow-sm) !important;
 
   .breadcrumb {
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
     
     .breadcrumb-item {
-      color: #64748b !important;
+      color: var(--av-text-muted) !important;
       
       &.active {
-        color: #0f172a !important;
+        color: var(--av-text) !important;
       }
 
       a {
-        color: var(--b2b-primary) !important;
+        color: var(--av-primary) !important;
         text-decoration: none !important;
-        transition: color var(--b2b-duration) var(--b2b-ease) !important;
+        transition: color var(--av-duration) var(--av-ease) !important;
 
         &:hover {
-          color: var(--b2b-primary-hover) !important;
+          color: var(--av-primary-dark) !important;
         }
       }
     }
   }
 
-  /* Search View / Filter Bar */
+  /* Search Bar (Floating Pill) */
   .o_searchview {
-    border: 1px solid var(--b2b-border) !important;
-    border-radius: var(--b2b-radius) !important;
-    background-color: var(--b2b-surface) !important;
-    padding: 0.35rem 0.75rem !important;
-    transition: all var(--b2b-duration) var(--b2b-ease) !important;
+    border: 1px solid var(--av-border) !important;
+    border-radius: var(--av-r-full) !important;
+    background-color: var(--av-surface) !important;
+    padding: 0.35rem 1rem !important;
+    box-shadow: var(--av-shadow-sm) !important;
+    transition: all var(--av-duration) var(--av-ease) !important;
 
     &:focus-within {
-      border-color: var(--b2b-primary) !important;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+      border-color: var(--av-primary) !important;
+      box-shadow: 0 0 0 3px var(--av-primary-glow) !important;
     }
 
     .o_searchview_input {
@@ -105,23 +134,28 @@ body, .o_web_client {
     }
 
     .o_searchview_facet {
-      background-color: var(--b2b-primary-light) !important;
-      border: 1px solid rgba(79, 70, 229, 0.2) !important;
-      border-radius: var(--b2b-radius-sm) !important;
-      color: var(--b2b-primary) !important;
-      font-weight: 500 !important;
+      background-color: var(--av-primary-light) !important;
+      border: 1px solid var(--av-primary-border) !important;
+      border-radius: var(--av-r-full) !important;
+      color: var(--av-primary) !important;
+      font-weight: 600 !important;
+      padding: 0.15rem 0.6rem !important;
+
+      .o_facet_remove {
+        color: var(--av-primary) !important;
+      }
     }
   }
 }
 
-/* 4. Action Buttons (Clean & Lift Effect) */
+/* 4. Action Buttons (Terracotta Coral & Lift) */
 .btn {
   font-weight: 500 !important;
   font-size: 0.875rem !important;
-  border-radius: var(--b2b-radius) !important;
-  padding: 0.45rem 1rem !important;
-  transition: all var(--b2b-duration) var(--b2b-ease) !important;
-  box-shadow: var(--b2b-shadow-sm) !important;
+  border-radius: var(--av-r-md) !important;
+  padding: 0.45rem 1.1rem !important;
+  transition: all var(--av-duration) var(--av-ease) !important;
+  box-shadow: var(--av-shadow-sm) !important;
 
   &:hover {
     transform: translateY(-1px) !important;
@@ -133,143 +167,147 @@ body, .o_web_client {
 }
 
 .btn-primary {
-  background-color: var(--b2b-primary) !important;
-  border-color: var(--b2b-primary) !important;
+  background-color: var(--av-primary) !important;
+  border-color: var(--av-primary) !important;
   color: #ffffff !important;
 
   &:hover, &:focus {
-    background-color: var(--b2b-primary-hover) !important;
-    border-color: var(--b2b-primary-hover) !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+    background-color: var(--av-primary-dark) !important;
+    border-color: var(--av-primary-dark) !important;
+    box-shadow: 0 4px 14px var(--av-primary-glow) !important;
   }
 }
 
 .btn-secondary {
-  background-color: var(--b2b-surface) !important;
-  border-color: var(--b2b-border) !important;
-  color: #334155 !important;
+  background-color: var(--av-surface) !important;
+  border-color: var(--av-border) !important;
+  color: var(--av-text) !important;
 
   &:hover, &:focus {
-    background-color: var(--b2b-surface-hover) !important;
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
+    background-color: var(--av-bg-subtle) !important;
+    border-color: var(--av-border-strong) !important;
   }
 }
 
-/* 5. Form View Sheet & Cards */
+/* 5. Form View (Bento Sheet with Soft Rounded Corners) */
 .o_form_view {
-  background-color: var(--b2b-bg) !important;
+  background-color: var(--av-bg) !important;
 
   .o_form_sheet_bg {
-    background-color: var(--b2b-bg) !important;
+    background-color: var(--av-bg) !important;
     padding: 1.5rem 1rem !important;
 
     .o_form_sheet {
-      background-color: var(--b2b-surface) !important;
-      border: 1px solid var(--b2b-border) !important;
-      border-radius: var(--b2b-radius-lg) !important;
-      box-shadow: var(--b2b-shadow) !important;
-      padding: 2rem !important;
-      max-width: 1200px !important;
+      background-color: var(--av-surface) !important;
+      border: 1px solid var(--av-border) !important;
+      border-radius: var(--av-r-lg) !important;
+      box-shadow: var(--av-shadow) !important;
+      padding: 2.25rem !important;
+      max-width: 1240px !important;
       margin: 0 auto !important;
     }
   }
 
-  /* Form Title */
   .oe_title h1, .oe_title h2 {
     font-weight: 700 !important;
     letter-spacing: -0.025em !important;
-    color: #0f172a !important;
+    color: var(--av-text) !important;
   }
 
-  /* Statusbar Header */
   .o_form_statusbar {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid var(--b2b-border) !important;
-    border-radius: var(--b2b-radius-lg) var(--b2b-radius-lg) 0 0 !important;
-    padding: 0.5rem 1rem !important;
+    background-color: var(--av-surface) !important;
+    border-bottom: 1px solid var(--av-border) !important;
+    border-radius: var(--av-r-lg) var(--av-r-lg) 0 0 !important;
+    padding: 0.6rem 1.25rem !important;
+
+    .o_arrow_button.btn-primary {
+      background-color: var(--av-primary-light) !important;
+      color: var(--av-primary) !important;
+      border: 1px solid var(--av-primary-border) !important;
+      font-weight: 600 !important;
+    }
   }
 }
 
-/* 6. List / Table View (Crisp, Sticky, Breathable) */
+/* 6. List / Table View (Clean Bento Rows) */
 .o_list_view {
-  background-color: var(--b2b-surface) !important;
+  background-color: var(--av-surface) !important;
 
   .table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
     
     thead th {
-      background-color: #f8fafc !important;
-      color: #475569 !important;
+      background-color: var(--av-bg-subtle) !important;
+      color: var(--av-text-muted) !important;
       font-weight: 600 !important;
       font-size: 0.8125rem !important;
       text-transform: uppercase !important;
-      letter-spacing: 0.04em !important;
-      border-bottom: 2px solid var(--b2b-border) !important;
-      padding: 0.75rem 1rem !important;
+      letter-spacing: 0.05em !important;
+      border-bottom: 2px solid var(--av-border) !important;
+      padding: 0.85rem 1rem !important;
       position: sticky !important;
       top: 0 !important;
       z-index: 2 !important;
     }
 
     tbody tr {
-      transition: background-color var(--b2b-duration) var(--b2b-ease) !important;
+      transition: background-color var(--av-duration) var(--av-ease) !important;
 
       td {
-        padding: 0.75rem 1rem !important;
-        border-bottom: 1px solid var(--b2b-border-subtle) !important;
+        padding: 0.8rem 1rem !important;
+        border-bottom: 1px solid var(--av-border-light) !important;
         font-size: 0.875rem !important;
         vertical-align: middle !important;
       }
 
       &:hover {
-        background-color: rgba(241, 245, 249, 0.7) !important;
+        background-color: #FFFBF9 !important; /* Subtle warm glow on hover */
       }
     }
   }
 }
 
-/* 7. Status Badges (Refined & Modern) */
+/* 7. Status Badges (Pill-shaped, Soft Tones) */
 .badge {
   font-weight: 600 !important;
   font-size: 0.75rem !important;
-  padding: 0.35rem 0.65rem !important;
-  border-radius: var(--b2b-radius-full) !important;
+  padding: 0.35rem 0.75rem !important;
+  border-radius: var(--av-r-full) !important;
   letter-spacing: 0.02em !important;
 
   &.text-bg-success, &[class*="decoration-success"] {
-    background-color: var(--b2b-success-bg) !important;
-    color: var(--b2b-success) !important;
-    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    background-color: var(--av-success-bg) !important;
+    color: var(--av-success) !important;
+    border: 1px solid var(--av-success-border) !important;
   }
 
   &.text-bg-info, &[class*="decoration-info"] {
-    background-color: var(--b2b-info-bg) !important;
-    color: var(--b2b-info) !important;
-    border: 1px solid rgba(2, 132, 199, 0.25) !important;
+    background-color: var(--av-primary-light) !important;
+    color: var(--av-primary) !important;
+    border: 1px solid var(--av-primary-border) !important;
   }
 
   &.text-bg-warning, &[class*="decoration-warning"] {
-    background-color: var(--b2b-warning-bg) !important;
-    color: var(--b2b-warning) !important;
-    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+    background-color: var(--av-warning-bg) !important;
+    color: var(--av-warning) !important;
+    border: 1px solid var(--av-warning-border) !important;
   }
 
   &.text-bg-danger, &[class*="decoration-danger"] {
-    background-color: var(--b2b-danger-bg) !important;
-    color: var(--b2b-danger) !important;
-    border: 1px solid rgba(244, 63, 94, 0.25) !important;
+    background-color: var(--av-danger-bg) !important;
+    color: var(--av-danger) !important;
+    border: 1px solid var(--av-danger-border) !important;
   }
 
   &.text-bg-muted, &[class*="decoration-muted"] {
-    background-color: #f1f5f9 !important;
-    color: #64748b !important;
-    border: 1px solid #e2e8f0 !important;
+    background-color: var(--av-bg-subtle) !important;
+    color: var(--av-text-muted) !important;
+    border: 1px solid var(--av-border) !important;
   }
 }
 
-/* 8. Thin Modern Scrollbar */
+/* 8. Thin Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -278,9 +316,9 @@ body, .o_web_client {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
+  background: var(--av-border-strong);
+  border-radius: var(--av-r-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--av-text-muted);
 }
