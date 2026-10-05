@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_travel" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.travel</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Star Travels" string="Star Travels" name="travel_core">
+                    <block title="Public Platform Integration" name="travel_integration_settings">
+                        <setting id="travel_platform_endpoint_setting" help="Destination API for sync events">
+                            <field name="travel_public_platform_url"/>
+                        </setting>
+                        <setting id="travel_webhook_secret_setting" help="Secret used to sign outbound webhooks and verify inbound webhooks">
+                            <field name="travel_webhook_secret" password="True"/>
+                        </setting>
+                        <setting id="travel_inbound_api_key_setting" help="Bearer token required for incoming inquiries">
+                            <field name="travel_api_key" password="True"/>
+                        </setting>
+                        <setting id="travel_auto_sync_setting" help="Immediately emit outbox events when content is published">
+                            <field name="travel_auto_publish_sync"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_travel_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'travel_core'}</field>
+    </record>
+
+    <menuitem id="menu_travel_settings"
+              name="Settings"
+              parent="menu_travel_config_root"
+              action="action_travel_config_settings"
+              sequence="100"/>
+</odoo>
