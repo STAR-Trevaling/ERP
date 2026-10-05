@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_travel_category_user,travel.category.user,model_travel_category,group_travel_user,1,1,1,0
+access_travel_category_manager,travel.category.manager,model_travel_category,group_travel_manager,1,1,1,1
+access_travel_amenity_user,travel.amenity.user,model_travel_amenity,group_travel_user,1,1,1,0
+access_travel_amenity_manager,travel.amenity.manager,model_travel_amenity,group_travel_manager,1,1,1,1

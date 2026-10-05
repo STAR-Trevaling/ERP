@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://star-travels.com/schemas/partner-application.json",
+  "title": "PartnerApplicationData",
+  "description": "Payload schema for partner.application.created and partner.approved events",
+  "type": "object",
+  "required": [
+    "application_id",
+    "business_name",
+    "email"
+  ],
+  "properties": {
+    "application_id": { "type": "string", "format": "uuid" },
+    "applicant_id": { "type": "string", "format": "uuid" },
+    "business_name": { "type": "string", "minLength": 1 },
+    "email": { "type": "string", "format": "email" },
+    "phone": { "type": "string" },
+    "website": { "type": "string", "format": "uri" },
+    "message": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["submitted", "under_review", "approved", "rejected"]
+    },
+    "organization": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" }
+      }
+    },
+    "rejection_reason": { "type": "string" },
+    "reviewed_at": { "type": "string", "format": "date-time" }
+  }
+}

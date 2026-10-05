@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Top-level Application Menu for Public CMS -->
+    <menuitem id="menu_travel_root"
+              name="CMS"
+              web_icon="travel_core,static/description/icon.png"
+              groups="travel_core.group_travel_user"
+              sequence="15"/>
+
+    <!-- Content Submenu (Destinations, Places, Articles) -->
+    <menuitem id="menu_travel_cms_root"
+              name="Content"
+              parent="menu_travel_root"
+              sequence="10"/>
+
+    <!-- Taxonomies Submenu (Categories, Amenities) -->
+    <menuitem id="menu_travel_taxonomies_root"
+              name="Taxonomies"
+              parent="menu_travel_root"
+              sequence="20"/>
+
+    <!-- Integration Submenu (Webhooks & Event Logs) -->
+    <menuitem id="menu_travel_integration_root"
+              name="Integrations &amp; Logs"
+              parent="menu_travel_root"
+              groups="travel_core.group_travel_manager"
+              sequence="30"/>
+
+    <!-- Configuration Submenu (Public Site Settings) -->
+    <menuitem id="menu_travel_config_root"
+              name="Configuration"
+              parent="menu_travel_root"
+              groups="travel_core.group_travel_manager"
+              sequence="90"/>
+</odoo>

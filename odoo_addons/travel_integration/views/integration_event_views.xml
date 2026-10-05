@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inbound Event List -->
+    <record id="view_travel_integration_event_tree" model="ir.ui.view">
+        <field name="name">travel.integration.event.list</field>
+        <field name="model">travel.integration.event</field>
+        <field name="arch" type="xml">
+            <list string="Inbound Events" decoration-success="state == 'processed'" decoration-danger="state == 'failed'" decoration-warning="state == 'pending'" create="0">
+                <field name="received_at"/>
+                <field name="source" widget="badge"/>
+                <field name="event_type"/>
+                <field name="external_event_id"/>
+                <field name="attempt_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'processed'" decoration-danger="state == 'failed'" decoration-warning="state == 'pending'"/>
+                <field name="res_model"/>
+                <field name="res_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Inbound Event Form -->
+    <record id="view_travel_integration_event_form" model="ir.ui.view">
+        <field name="name">travel.integration.event.form</field>
+        <field name="model">travel.integration.event</field>
+        <field name="arch" type="xml">
+            <form string="Inbound Integration Event" create="0">
+                <header>
+                    <button name="action_retry" string="Retry Event Processing" type="object" class="btn-primary" invisible="state != 'failed'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,processed,failed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Event Metadata">
+                            <field name="source" widget="badge"/>
+                            <field name="event_type"/>
+                            <field name="event_version"/>
+                            <field name="external_event_id"/>
+                            <field name="payload_hash"/>
+                        </group>
+                        <group string="Execution Status">
+                            <field name="received_at"/>
+                            <field name="processed_at"/>
+                            <field name="attempt_count"/>
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                        </group>
+                    </group>
+                    <group string="Error Trace" invisible="not last_error">
+                        <field name="last_error" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Raw Inbound Payload">
+                            <field name="raw_payload" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                        <page string="Response JSON">
+                            <field name="response_json" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_travel_integration_event" model="ir.actions.act_window">
+        <field name="name">Inbound Events</field>
+        <field name="res_model">travel.integration.event</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_travel_inbound_events"
+              name="Inbound Event Log"
+              parent="travel_core.menu_travel_integration_root"
+              action="action_travel_integration_event"
+              sequence="10"/>
+</odoo>

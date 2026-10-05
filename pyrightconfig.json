@@ -1,8 +1,7 @@
 {
-  "venvPath": ".",
-  "venv": ".venv",
   "extraPaths": [
-    "backend",
+    ".",
+    "odoo",
     "odoo_addons"
   ],
   "typeCheckingMode": "off",

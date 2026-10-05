@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Category Views -->
+    <record id="view_travel_category_tree" model="ir.ui.view">
+        <field name="name">travel.category.list</field>
+        <field name="model">travel.category</field>
+        <field name="arch" type="xml">
+            <list string="Categories">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="slug"/>
+                <field name="icon"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_travel_category_form" model="ir.ui.view">
+        <field name="name">travel.category.form</field>
+        <field name="model">travel.category</field>
+        <field name="arch" type="xml">
+            <form string="Travel Category">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Scenic Spots, Cafes, Heritage"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="slug"/>
+                            <field name="icon" placeholder="e.g. coffee, mountain, landmark"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Description of this category..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_travel_category" model="ir.actions.act_window">
+        <field name="name">Place Categories</field>
+        <field name="res_model">travel.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create the first category for Star Travels places and attractions!
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_travel_category"
+              name="Categories"
+              parent="menu_travel_taxonomies_root"
+              action="action_travel_category"
+              sequence="10"/>
+
+    <!-- Amenity Views -->
+    <record id="view_travel_amenity_tree" model="ir.ui.view">
+        <field name="name">travel.amenity.list</field>
+        <field name="model">travel.amenity</field>
+        <field name="arch" type="xml">
+            <list string="Amenities">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category"/>
+                <field name="icon"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_travel_amenity_form" model="ir.ui.view">
+        <field name="name">travel.amenity.form</field>
+        <field name="model">travel.amenity</field>
+        <field name="arch" type="xml">
+            <form string="Amenity">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Free Wi-Fi, Parking, Pet Friendly"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="category"/>
+                        </group>
+                        <group>
+                            <field name="icon"/>
+                            <field name="description"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_travel_amenity" model="ir.actions.act_window">
+        <field name="name">Amenities</field>
+        <field name="res_model">travel.amenity</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_travel_amenity"
+              name="Amenities"
+              parent="menu_travel_taxonomies_root"
+              action="action_travel_amenity"
+              sequence="20"/>
+</odoo>

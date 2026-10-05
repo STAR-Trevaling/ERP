@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://star-travels.com/schemas/canonical-event-envelope.json",
+  "title": "CanonicalEventEnvelope",
+  "description": "Standard event envelope for all Star Travels platform and Odoo integration events",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "source",
+    "occurred_at",
+    "data"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Globally unique identifier for the event"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Domain event type name (e.g. inquiry.created, place.published)",
+      "pattern": "^[a-z_]+(\\.[a-z_]+)+$"
+    },
+    "event_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema version of the event payload"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "public-platform",
+        "odoo",
+        "facebook",
+        "zalo",
+        "pancake",
+        "ota",
+        "partner",
+        "ai-assistant"
+      ],
+      "description": "Originating system of the event"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when the event occurred"
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Trace ID tracking the end-to-end request flow"
+    },
+    "causation_id": {
+      "type": "string",
+      "description": "Event ID that triggered this event"
+    },
+    "external_id": {
+      "type": "string",
+      "description": "Original external provider ID (e.g. Facebook message ID)"
+    },
+    "data": {
+      "type": "object",
+      "description": "Domain-specific event payload conforming to event_type schema"
+    }
+  },
+  "additionalProperties": false
+}

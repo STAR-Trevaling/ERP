@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Outbox List -->
+    <record id="view_travel_integration_outbox_tree" model="ir.ui.view">
+        <field name="name">travel.integration.outbox.list</field>
+        <field name="model">travel.integration.outbox</field>
+        <field name="arch" type="xml">
+            <list string="Outbox Events" decoration-success="state == 'delivered'" decoration-danger="state == 'failed'" decoration-warning="state == 'pending'" create="0">
+                <field name="create_date" string="Enqueued At"/>
+                <field name="event_type"/>
+                <field name="event_id"/>
+                <field name="retry_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'delivered'" decoration-danger="state == 'failed'" decoration-warning="state == 'pending'"/>
+                <field name="http_status"/>
+                <field name="next_retry_at"/>
+                <field name="delivered_at"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Outbox Form -->
+    <record id="view_travel_integration_outbox_form" model="ir.ui.view">
+        <field name="name">travel.integration.outbox.form</field>
+        <field name="model">travel.integration.outbox</field>
+        <field name="arch" type="xml">
+            <form string="Outbox Event" create="0">
+                <header>
+                    <button name="action_force_retry" string="Force Deliver Now" type="object" class="btn-primary" invisible="state == 'delivered'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,delivered,failed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Envelope Metadata">
+                            <field name="event_id" readonly="1"/>
+                            <field name="event_type" readonly="1"/>
+                            <field name="event_version" readonly="1"/>
+                            <field name="source" readonly="1"/>
+                        </group>
+                        <group string="Delivery Lifecycle">
+                            <field name="retry_count" readonly="1"/>
+                            <field name="max_retries" readonly="1"/>
+                            <field name="http_status" readonly="1"/>
+                            <field name="next_retry_at" readonly="1"/>
+                            <field name="delivered_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Delivery Error" invisible="not last_error">
+                        <field name="last_error" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Outbound Payload">
+                            <field name="payload" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_travel_integration_outbox" model="ir.actions.act_window">
+        <field name="name">Outbox Queue</field>
+        <field name="res_model">travel.integration.outbox</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_travel_outbox_events"
+              name="Outbox Queue"
+              parent="travel_core.menu_travel_integration_root"
+              action="action_travel_integration_outbox"
+              sequence="20"/>
+</odoo>
