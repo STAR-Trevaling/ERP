@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://star-travels.com/schemas/content-published.json",
+  "title": "ContentPublishedData",
+  "description": "Payload schema for destination, place, and article published events emitted by Odoo CMS",
+  "type": "object",
+  "required": [
+    "content_type",
+    "slug",
+    "version",
+    "published_at"
+  ],
+  "properties": {
+    "content_type": {
+      "type": "string",
+      "enum": ["destination", "place", "article"]
+    },
+    "id": { "type": "string" },
+    "slug": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "published_at": { "type": "string", "format": "date-time" },
+    "destination": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "country": { "type": "string" },
+        "summary": { "type": "string" },
+        "description": { "type": "string" },
+        "image_url": { "type": "string" },
+        "hero_image_url": { "type": "string" },
+        "starting_price": { "type": ["number", "null"] },
+        "latitude": { "type": ["number", "null"] },
+        "longitude": { "type": ["number", "null"] }
+      }
+    },
+    "place": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "destination_slug": { "type": "string" },
+        "category_slug": { "type": "string" },
+        "short_description": { "type": "string" },
+        "description": { "type": "string" },
+        "image_url": { "type": "string" },
+        "overlay_image_url": { "type": "string" },
+        "address": { "type": "string" },
+        "website_url": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" }
+      }
+    },
+    "article": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "body": { "type": "string" },
+        "cover_image": { "type": "string" },
+        "destination_slug": { "type": ["string", "null"] },
+        "place_slug": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

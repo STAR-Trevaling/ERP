@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Star Travels ↔ Odoo 18 Integration API
+  version: 1.0.0
+  description: >
+    Production-grade integration contract between Star Travels Public Platform (Django/Next.js)
+    and Odoo 18 Backoffice (CRM + CMS + Partner Operations).
+servers:
+  - url: http://localhost:8069/api/v1/travel
+    description: Local Odoo 18 Server
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: getIntegrationHealth
+      responses:
+        '200':
+          description: Odoo Integration service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "ok" }
+                  timestamp: { type: string, format: date-time }
+                  version: { type: string, example: "18.0.1.0.0" }
+
+  /inquiry:
+    post:
+      summary: Submit customer travel inquiry from public website or social channels
+      operationId: submitTravelInquiry
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Unique client key ensuring at-most-once processing
+          schema:
+            type: string
+            format: uuid
+        - name: X-Signature-SHA256
+          in: header
+          required: false
+          description: HMAC-SHA256 signature of request body using shared webhook secret
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanonicalEventEnvelope'
+      responses:
+        '200':
+          description: Inquiry processed successfully or returned existing idempotent result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryResponse'
+        '400':
+          description: Invalid request payload or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthorized - invalid API key or HMAC signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /partner-application:
+    post:
+      summary: Submit partner onboarding application for backoffice review
+      operationId: submitPartnerApplication
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanonicalEventEnvelope'
+      responses:
+        '200':
+          description: Partner application received and queued for review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerApplicationResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    CanonicalEventEnvelope:
+      type: object
+      required: [event_id, event_type, event_version, source, occurred_at, data]
+      properties:
+        event_id: { type: string, format: uuid }
+        event_type: { type: string, example: "inquiry.created" }
+        event_version: { type: integer, example: 1 }
+        source: { type: string, example: "public-platform" }
+        occurred_at: { type: string, format: date-time }
+        correlation_id: { type: string }
+        data: { type: object }
+
+    InquiryResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        event_id: { type: string, format: uuid }
+        lead_id: { type: integer, example: 42 }
+        lead_name: { type: string, example: "Tour Vung Tau - Nguyen Van A" }
+        partner_id: { type: integer, example: 120 }
+        status: { type: string, example: "created" }
+
+    PartnerApplicationResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        event_id: { type: string, format: uuid }
+        application_id: { type: integer, example: 15 }
+        status: { type: string, example: "submitted" }
+
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string, format: uri, example: "https://star-travels.com/errors/invalid-payload" }
+        title: { type: string, example: "Bad Request" }
+        status: { type: integer, example: 400 }
+        detail: { type: string, example: "Field 'customer.name' is required." }
+        instance: { type: string, example: "/api/v1/travel/inquiry" }

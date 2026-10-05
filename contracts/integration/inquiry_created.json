@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://star-travels.com/schemas/inquiry-created.json",
+  "title": "InquiryCreatedData",
+  "description": "Payload schema for inquiry.created / lead.created events arriving at Odoo CRM",
+  "type": "object",
+  "required": [
+    "customer",
+    "inquiry_type"
+  ],
+  "properties": {
+    "public_inquiry_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "inquiry_type": {
+      "type": "string",
+      "enum": [
+        "consultation",
+        "tour_booking",
+        "partner_inquiry",
+        "general_support"
+      ]
+    },
+    "customer": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "public_customer_id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1 },
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "identity_provider": { "type": "string", "enum": ["public_auth", "facebook", "zalo", "phone", "direct"] }
+      }
+    },
+    "interest": {
+      "type": "object",
+      "properties": {
+        "destination_slug": { "type": "string" },
+        "destination_name": { "type": "string" },
+        "place_slug": { "type": "string" },
+        "place_name": { "type": "string" },
+        "travel_date": { "type": "string", "format": "date" },
+        "traveler_count": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "source_metadata": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" },
+        "campaign": { "type": "string" },
+        "landing_page": { "type": "string" },
+        "referrer": { "type": "string" },
+        "external_lead_id": { "type": "string" }
+      }
+    },
+    "message": {
+      "type": "string"
+    }
+  }
+}
