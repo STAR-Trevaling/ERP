@@ -22,20 +22,35 @@ body, .o_web_client {
   background: #94a3b8;
 }
 
-// Navbar Styling
+// Navbar Styling (Star Travels Clean White Header)
 .o_main_navbar {
   background-color: #FFFFFF !important;
   border-bottom: 1px solid var(--admin-border) !important;
   color: var(--admin-text) !important;
-  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.03) !important;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.04) !important;
 
-  .o_nav_entry, .o_menu_brand, .nav-link {
+  // General Navbar Entries, Links, Buttons & Dropdown Toggles
+  .o_nav_entry, 
+  .o_menu_brand, 
+  .nav-link,
+  .dropdown-toggle,
+  .o_menu_sections button,
+  .o_menu_sections .dropdown-toggle {
     color: var(--admin-text) !important;
     font-weight: 600 !important;
     font-size: 0.92rem;
     transition: all 0.2s ease;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 
-    &:hover, &.active {
+    &:hover {
+      color: var(--primary) !important;
+      background-color: var(--primary-light) !important;
+      border-radius: 8px;
+    }
+
+    &.active, &.show {
       color: var(--primary) !important;
       background-color: var(--primary-light) !important;
       border-radius: 8px;
@@ -46,6 +61,56 @@ body, .o_web_client {
     color: var(--primary) !important;
     font-weight: 800 !important;
     letter-spacing: -0.5px;
+    font-size: 1.15rem !important;
+  }
+
+  // App Switcher Icon / Button
+  .o_navbar_apps_menu button {
+    color: var(--primary) !important;
+    font-size: 1.15rem !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+
+    &:hover {
+      background-color: var(--primary-light) !important;
+    }
+  }
+
+  // Systray Right Section (Icons, Badges, User Menu)
+  .o_systray, .o_menu_systray {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .o_nav_entry, button, .dropdown-toggle {
+      color: #475467 !important;
+      padding: 6px 10px !important;
+      border-radius: 8px !important;
+
+      i, svg, span:not(.badge) {
+        color: #475467 !important;
+        font-size: 1.05rem !important;
+      }
+
+      &:hover {
+        color: var(--primary) !important;
+        background-color: var(--primary-light) !important;
+
+        i, svg, span:not(.badge) {
+          color: var(--primary) !important;
+        }
+      }
+    }
+
+    // Active dropdown in systray
+    .show > .dropdown-toggle {
+      color: var(--primary) !important;
+      background-color: var(--primary-light) !important;
+
+      i, svg {
+        color: var(--primary) !important;
+      }
+    }
   }
 }
 
@@ -262,3 +327,53 @@ body, .o_web_client {
     border: 1px solid #EAECF0 !important;
   }
 }
+
+// Discuss & Communication UI Styling
+.o-mail-DiscussSidebar {
+  background-color: #FFFFFF !important;
+  border-right: 1px solid #EEF2F6 !important;
+
+  .o-mail-DiscussSidebarCategory-header,
+  .o-mail-DiscussSidebar-category {
+    color: #475467 !important;
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .o-mail-DiscussSidebarChannel,
+  .o-mail-DiscussSidebar-item {
+    color: var(--admin-text) !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--primary-light) !important;
+      color: var(--primary) !important;
+    }
+
+    &.active, &.o-active {
+      background-color: var(--primary-light) !important;
+      color: var(--primary) !important;
+      font-weight: 700 !important;
+    }
+  }
+}
+
+// General Secondary Action Buttons & Search Icons
+.btn-light, .btn-outline-secondary {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+
+  &:hover {
+    background-color: #F8FAFC !important;
+    color: var(--primary) !important;
+    border-color: #CBD5E1 !important;
+  }
+}
+

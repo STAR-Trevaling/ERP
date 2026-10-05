@@ -1,16 +1,14 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/backend",
-    "${workspaceFolder}/odoo_addons",
-    "${workspaceFolder}/.venv/Lib/site-packages",
-    "${workspaceFolder}/backend/.venv/Lib/site-packages"
+    "${workspaceFolder}",
+    "${workspaceFolder}/odoo",
+    "${workspaceFolder}/odoo_addons"
   ],
   "python.autoComplete.extraPaths": [
-    "${workspaceFolder}/backend",
-    "${workspaceFolder}/odoo_addons",
-    "${workspaceFolder}/.venv/Lib/site-packages",
-    "${workspaceFolder}/backend/.venv/Lib/site-packages"
+    "${workspaceFolder}",
+    "${workspaceFolder}/odoo",
+    "${workspaceFolder}/odoo_addons"
   ],
   "python.pyrefly.typeCheckingMode": "off",
   "pyrefly.typeCheckingMode": "off",
