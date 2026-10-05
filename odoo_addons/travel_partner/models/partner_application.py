@@ -54,8 +54,6 @@ class TravelPartnerApplication(models.Model):
                 'phone': rec.phone,
                 'website': rec.website,
                 'is_company': True,
-                'customer_rank': 0,
-                'supplier_rank': 1,
                 'comment': f"Star Travels Partner approved from application {rec.public_application_id or rec.id}",
             }
             partner = self.env['res.partner'].create(partner_vals)

@@ -14,12 +14,14 @@ class TravelIntegrationEvent(models.Model):
 
     source = fields.Selection([
         ('public-platform', 'Star Travels Public Platform'),
+        ('website', 'Star Travels Website'),
         ('facebook', 'Facebook Messenger'),
         ('zalo', 'Zalo OA'),
         ('pancake', 'Pancake POS'),
         ('ota', 'OTA Integration'),
         ('partner', 'Partner Platform'),
         ('ai-assistant', 'AI Assistant'),
+        ('direct', 'Direct Call / Walk-in'),
     ], string="Source Channel", required=True, index=True)
 
     external_event_id = fields.Char(

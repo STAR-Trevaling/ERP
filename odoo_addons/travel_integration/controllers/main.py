@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http
+from odoo import http, SUPERUSER_ID
 from odoo.http import request, Response
 import json
 import hmac
@@ -116,7 +116,8 @@ class TravelIntegrationController(http.Controller):
         }
 
         try:
-            result = request.env['travel.integration.event'].sudo().process_inbound_envelope(envelope)
+            env = request.env(user=SUPERUSER_ID)
+            result = env['travel.integration.event'].process_inbound_envelope(envelope)
             return self._json_response(result, status=200)
         except Exception as e:
             _logger.exception("Error handling inbound inquiry: %s", str(e))
@@ -173,7 +174,8 @@ class TravelIntegrationController(http.Controller):
         }
 
         try:
-            result = request.env['travel.integration.event'].sudo().process_inbound_envelope(envelope)
+            env = request.env(user=SUPERUSER_ID)
+            result = env['travel.integration.event'].process_inbound_envelope(envelope)
             return self._json_response(result, status=200)
         except Exception as e:
             _logger.exception("Error handling partner application: %s", str(e))

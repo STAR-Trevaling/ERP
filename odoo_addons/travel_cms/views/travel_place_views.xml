@@ -14,7 +14,7 @@
                 <field name="image_url"/>
                 <field name="average_rating"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click o_kanban_record">
                             <div class="o_kanban_image" t-if="record.image_url.raw_value">
                                 <img t-att-src="record.image_url.raw_value" alt="Place Thumbnail" style="width: 64px; height: 64px; object-fit: cover; border-radius: 4px;"/>
@@ -130,7 +130,7 @@
 
     <menuitem id="menu_travel_place"
               name="Places &amp; Attractions"
-              parent="menu_travel_cms_root"
+              parent="travel_core.menu_travel_cms_root"
               action="action_travel_place"
               sequence="20"/>
 </odoo>

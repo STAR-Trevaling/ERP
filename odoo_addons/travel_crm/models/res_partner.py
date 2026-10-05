@@ -14,12 +14,15 @@ class ResPartner(models.Model):
     )
     identity_provider = fields.Selection([
         ('public_auth', 'Star Travels Public Web'),
+        ('website', 'Star Travels Website'),
         ('facebook', 'Facebook Messenger'),
         ('zalo', 'Zalo Official Account'),
         ('pancake', 'Pancake POS'),
         ('google', 'Google OAuth'),
         ('phone', 'SMS / Direct Phone'),
         ('direct', 'Direct Walk-in / Call'),
+        ('ota', 'OTA Channel'),
+        ('partner', 'Partner Platform'),
     ], string="Identity Provider", default='public_auth', index=True)
 
     travel_inquiry_count = fields.Integer(
@@ -102,6 +105,5 @@ class ResPartner(models.Model):
             'email': norm_email or (email or False),
             'public_customer_id': str(public_id) if public_id else False,
             'identity_provider': provider,
-            'customer_rank': 1,
         }
         return self.create(vals)

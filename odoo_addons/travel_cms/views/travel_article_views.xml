@@ -78,7 +78,7 @@
 
     <menuitem id="menu_travel_article"
               name="Stories &amp; Articles"
-              parent="menu_travel_cms_root"
+              parent="travel_core.menu_travel_cms_root"
               action="action_travel_article"
               sequence="30"/>
 </odoo>

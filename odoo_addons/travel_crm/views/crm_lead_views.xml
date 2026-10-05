@@ -45,10 +45,15 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('oe_kanban_bottom_left')]" position="inside">
-                <span class="badge rounded-pill text-bg-primary" t-if="record.source_system.raw_value">
-                    <field name="source_system"/>
-                </span>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <div class="mt-1" t-if="record.source_system.raw_value">
+                    <span class="badge rounded-pill text-bg-primary">
+                        <field name="source_system"/>
+                    </span>
+                    <span class="badge rounded-pill text-bg-info ms-1" t-if="record.destination_interest_id.raw_value">
+                        <field name="destination_interest_id"/>
+                    </span>
+                </div>
             </xpath>
         </field>
     </record>

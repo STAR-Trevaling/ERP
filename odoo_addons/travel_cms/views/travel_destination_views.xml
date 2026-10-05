@@ -14,7 +14,7 @@
                 <field name="image_url"/>
                 <field name="place_count"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click o_kanban_record">
                             <div class="o_kanban_image" t-if="record.image_url.raw_value">
                                 <img t-att-src="record.image_url.raw_value" alt="Destination Image" style="width: 64px; height: 64px; object-fit: cover; border-radius: 4px;"/>
@@ -132,7 +132,7 @@
 
     <menuitem id="menu_travel_destination"
               name="Destinations"
-              parent="menu_travel_cms_root"
+              parent="travel_core.menu_travel_cms_root"
               action="action_travel_destination"
               sequence="10"/>
 </odoo>
