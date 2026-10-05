@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Place Kanban -->
+    <record id="view_travel_place_kanban" model="ir.ui.view">
+        <field name="name">travel.place.kanban</field>
+        <field name="model">travel.place</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="destination_id"/>
+                <field name="category_id"/>
+                <field name="state"/>
+                <field name="image_url"/>
+                <field name="average_rating"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record">
+                            <div class="o_kanban_image" t-if="record.image_url.raw_value">
+                                <img t-att-src="record.image_url.raw_value" alt="Place Thumbnail" style="width: 64px; height: 64px; object-fit: cover; border-radius: 4px;"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                <div class="text-muted"><field name="destination_id"/> &amp;bull; <field name="category_id"/></div>
+                                <div>
+                                    <span class="badge rounded-pill text-bg-warning">
+                                        ★ <t t-esc="record.average_rating.raw_value"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Place List -->
+    <record id="view_travel_place_tree" model="ir.ui.view">
+        <field name="name">travel.place.list</field>
+        <field name="model">travel.place</field>
+        <field name="arch" type="xml">
+            <list string="Places" decoration-info="state == 'in_review'" decoration-success="state == 'published'" decoration-muted="state == 'archived'">
+                <field name="name"/>
+                <field name="destination_id"/>
+                <field name="category_id"/>
+                <field name="average_rating"/>
+                <field name="review_count"/>
+                <field name="state" widget="badge" decoration-info="state == 'in_review'" decoration-success="state == 'published'" decoration-warning="state == 'draft'" decoration-muted="state == 'archived'"/>
+                <field name="published_at"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Place Form -->
+    <record id="view_travel_place_form" model="ir.ui.view">
+        <field name="name">travel.place.form</field>
+        <field name="model">travel.place</field>
+        <field name="arch" type="xml">
+            <form string="Place &amp; Attraction">
+                <header>
+                    <button name="action_submit_review" string="Submit for Review" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="state != 'in_review'" groups="travel_core.group_travel_manager"/>
+                    <button name="action_publish" string="Publish to Website" type="object" class="btn-primary" invisible="state not in ('approved', 'published')" groups="travel_core.group_travel_manager"/>
+                    <button name="action_request_changes" string="Request Changes" type="object" invisible="state != 'in_review'"/>
+                    <button name="action_archive" string="Archive" type="object" invisible="state == 'archived'"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object" invisible="state not in ('archived', 'approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_review,approved,published"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Marble Mountains, Dragon Bridge"/></h1>
+                    </div>
+                    <group>
+                        <group string="Categorization &amp; Link">
+                            <field name="slug"/>
+                            <field name="public_id" readonly="1"/>
+                            <field name="destination_id"/>
+                            <field name="category_id"/>
+                            <field name="amenity_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Geospatial &amp; Location">
+                            <field name="address"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="website_url"/>
+                            <field name="average_rating"/>
+                            <field name="review_count"/>
+                        </group>
+                    </group>
+                    <group string="Media URLs">
+                        <group>
+                            <field name="image_url" placeholder="https://... card preview"/>
+                        </group>
+                        <group>
+                            <field name="overlay_image_url" placeholder="https://... high-res overlay"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Editorial Descriptions">
+                            <group>
+                                <field name="short_description" placeholder="Max 280 chars summary..."/>
+                            </group>
+                            <separator string="Full Rich Content"/>
+                            <field name="description" placeholder="Editorial content..."/>
+                        </page>
+                        <page string="Publishing &amp; Staff Notes">
+                            <group>
+                                <group>
+                                    <field name="version"/>
+                                    <field name="published_at"/>
+                                    <field name="reviewer_id"/>
+                                </group>
+                            </group>
+                            <field name="internal_notes" placeholder="Internal editorial notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_travel_place" model="ir.actions.act_window">
+        <field name="name">Places &amp; Experiences</field>
+        <field name="res_model">travel.place</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <menuitem id="menu_travel_place"
+              name="Places &amp; Attractions"
+              parent="menu_travel_cms_root"
+              action="action_travel_place"
+              sequence="20"/>
+</odoo>
