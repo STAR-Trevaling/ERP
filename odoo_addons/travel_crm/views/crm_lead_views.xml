@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit CRM Lead Form -->
+    <record id="crm_lead_view_form_inherit_travel" model="ir.ui.view">
+        <field name="name">crm.lead.view.form.inherit.travel</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='lead_partner']" position="after">
+                <group string="Travel Inquiry Details" name="travel_inquiry_details">
+                    <group>
+                        <field name="source_system" widget="badge"/>
+                        <field name="inquiry_type"/>
+                        <field name="destination_interest_id"/>
+                        <field name="place_interest_id"/>
+                    </group>
+                    <group>
+                        <field name="travel_date_intended"/>
+                        <field name="traveler_count"/>
+                        <field name="public_customer_id" readonly="1"/>
+                        <field name="external_lead_id" readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit CRM Lead List View -->
+    <record id="crm_case_tree_view_oppor_inherit_travel" model="ir.ui.view">
+        <field name="name">crm.lead.list.inherit.travel</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="source_system" widget="badge" optional="show"/>
+                <field name="inquiry_type" optional="show"/>
+                <field name="destination_interest_id" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit CRM Lead Kanban View -->
+    <record id="crm_case_kanban_view_leads_inherit_travel" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.inherit.travel</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_kanban_bottom_left')]" position="inside">
+                <span class="badge rounded-pill text-bg-primary" t-if="record.source_system.raw_value">
+                    <field name="source_system"/>
+                </span>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action for Travel Leads -->
+    <record id="action_travel_crm_leads" model="ir.actions.act_window">
+        <field name="name">Travel Inquiries &amp; Leads</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="context">{
+            'default_type': 'lead',
+            'search_default_assigned_to_me': 0,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No travel inquiries yet. Inquiries from the website and social channels will appear here automatically!
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_travel_crm_leads"
+              name="Inquiries &amp; Leads"
+              parent="travel_core.menu_travel_crm_root"
+              action="action_travel_crm_leads"
+              sequence="10"/>
+</odoo>
