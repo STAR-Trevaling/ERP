@@ -36,7 +36,8 @@ class TravelIntegrationController(http.Controller):
         # Check HMAC-SHA256 signature
         if sig_header:
             raw_body = request.httprequest.get_data()
-            computed_sig = hmac.new(conf_secret.encode('utf-8'), raw_body, hashlib.sha256).hexdigest()
+            body_bytes = raw_body.encode('utf-8') if isinstance(raw_body, str) else raw_body
+            computed_sig = hmac.new(conf_secret.encode('utf-8'), body_bytes, hashlib.sha256).hexdigest()
             if hmac.compare_digest(sig_header, computed_sig):
                 return True
 
