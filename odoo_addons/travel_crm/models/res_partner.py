@@ -13,8 +13,8 @@ class ResPartner(models.Model):
         help="UUID of traveler on the public Django platform",
     )
     identity_provider = fields.Selection([
-        ('public_auth', 'Star Travels Public Web'),
-        ('website', 'Star Travels Website'),
+        ('public_auth', 'Public Web App'),
+        ('website', 'Public Website'),
         ('facebook', 'Facebook Messenger'),
         ('zalo', 'Zalo Official Account'),
         ('pancake', 'Pancake POS'),

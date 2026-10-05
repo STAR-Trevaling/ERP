@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Top-level Application Menu for Star Travels Public CMS -->
+    <!-- Top-level Application Menu for Public CMS -->
     <menuitem id="menu_travel_root"
-              name="Star Travels CMS"
+              name="CMS"
               web_icon="travel_core,static/description/icon.png"
+              groups="travel_core.group_travel_user"
               sequence="15"/>
 
     <!-- Content Submenu (Destinations, Places, Articles) -->

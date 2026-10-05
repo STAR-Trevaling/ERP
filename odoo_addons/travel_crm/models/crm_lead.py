@@ -15,7 +15,7 @@ class CrmLead(models.Model):
         help="UUID of traveler on the public platform",
     )
     source_system = fields.Selection([
-        ('website', 'Star Travels Website'),
+        ('website', 'Public Website'),
         ('facebook', 'Facebook'),
         ('zalo', 'Zalo'),
         ('pancake', 'Pancake POS'),

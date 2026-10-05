@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position="after">
-                <page string="Star Travels Identity" name="travel_identity">
+                <page string="Public Platform Identity" name="travel_identity">
                     <group>
                         <group string="Public Platform Sync">
                             <field name="public_customer_id" readonly="1"/>
@@ -27,7 +27,7 @@
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='type_person']" position="after">
                 <separator/>
-                <filter string="Travelers (Star Travels)" name="travelers" domain="[('public_customer_id', '!=', False)]"/>
+                <filter string="Travelers" name="travelers" domain="[('public_customer_id', '!=', False)]"/>
             </xpath>
             <xpath expr="//group" position="inside">
                 <filter string="Identity Provider" name="groupby_identity_provider" context="{'group_by': 'identity_provider'}"/>

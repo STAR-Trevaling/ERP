@@ -7,7 +7,7 @@ import re
 
 class TravelPartnerApplication(models.Model):
     _name = 'travel.partner.application'
-    _description = 'Star Travels Partner Onboarding Application'
+    _description = 'Partner Onboarding Application'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'create_date desc'
 
@@ -54,7 +54,7 @@ class TravelPartnerApplication(models.Model):
                 'phone': rec.phone,
                 'website': rec.website,
                 'is_company': True,
-                'comment': f"Star Travels Partner approved from application {rec.public_application_id or rec.id}",
+                'comment': f"Partner approved from application {rec.public_application_id or rec.id}",
             }
             partner = self.env['res.partner'].create(partner_vals)
 
