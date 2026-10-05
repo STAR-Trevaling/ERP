@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Web Client Title Customization -->
+    <template id="web_layout_inherit_travel" inherit_id="web.layout">
+        <xpath expr="//title" position="replace">
+            <title>Star Travels | Trung Tâm Điều Hành Nền Tảng</title>
+        </xpath>
+    </template>
+</odoo>
