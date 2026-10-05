@@ -18,6 +18,7 @@ Star Travels Partner Operations Module
     'depends': [
         'base',
         'mail',
+        'contacts',
         'travel_core',
     ],
     'data': [

@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Top-level Application Menu -->
+    <!-- Top-level Application Menu for Star Travels Public CMS -->
     <menuitem id="menu_travel_root"
-              name="Star Travels"
+              name="Star Travels CMS"
               web_icon="travel_core,static/description/icon.png"
               sequence="15"/>
 
-
-    <!-- CMS Submenu -->
+    <!-- Content Submenu (Destinations, Places, Articles) -->
     <menuitem id="menu_travel_cms_root"
-              name="Content &amp; CMS"
+              name="Content"
+              parent="menu_travel_root"
+              sequence="10"/>
+
+    <!-- Taxonomies Submenu (Categories, Amenities) -->
+    <menuitem id="menu_travel_taxonomies_root"
+              name="Taxonomies"
               parent="menu_travel_root"
               sequence="20"/>
 
-    <!-- Partners Submenu -->
-    <menuitem id="menu_travel_partners_root"
-              name="Partners"
-              parent="menu_travel_root"
-              sequence="30"/>
-
-    <!-- Integration Submenu -->
+    <!-- Integration Submenu (Webhooks & Event Logs) -->
     <menuitem id="menu_travel_integration_root"
               name="Integrations &amp; Logs"
               parent="menu_travel_root"
               groups="travel_core.group_travel_manager"
-              sequence="40"/>
+              sequence="30"/>
 
-    <!-- Configuration Submenu -->
+    <!-- Configuration Submenu (Public Site Settings) -->
     <menuitem id="menu_travel_config_root"
               name="Configuration"
               parent="menu_travel_root"

@@ -58,7 +58,7 @@
 
     <menuitem id="menu_travel_category"
               name="Categories"
-              parent="menu_travel_config_root"
+              parent="menu_travel_taxonomies_root"
               action="action_travel_category"
               sequence="10"/>
 
@@ -109,7 +109,7 @@
 
     <menuitem id="menu_travel_amenity"
               name="Amenities"
-              parent="menu_travel_config_root"
+              parent="menu_travel_taxonomies_root"
               action="action_travel_amenity"
               sequence="20"/>
 </odoo>

@@ -105,8 +105,8 @@
     </record>
 
     <menuitem id="menu_travel_partner_apps"
-              name="Applications"
-              parent="travel_core.menu_travel_partners_root"
+              name="Partner Applications"
+              parent="contacts.menu_contacts"
               action="action_travel_partner_application"
-              sequence="10"/>
+              sequence="5"/>
 </odoo>
