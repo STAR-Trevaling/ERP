@@ -19,17 +19,19 @@
         </field>
     </record>
 
-    <!-- Menu for Travelers / Customers -->
-    <record id="action_travel_partners" model="ir.actions.act_window">
-        <field name="name">Travelers</field>
-        <field name="res_model">res.partner</field>
-        <field name="view_mode">kanban,list,form</field>
-        <field name="context">{'search_default_customer': 1}</field>
+    <!-- Inherit Partner Filter / Search View in Native Contacts App -->
+    <record id="view_res_partner_filter_inherit_travel" model="ir.ui.view">
+        <field name="name">res.partner.search.inherit.travel</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='type_person']" position="after">
+                <separator/>
+                <filter string="Travelers (Star Travels)" name="travelers" domain="[('public_customer_id', '!=', False)]"/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Identity Provider" name="groupby_identity_provider" context="{'group_by': 'identity_provider'}"/>
+            </xpath>
+        </field>
     </record>
-
-    <menuitem id="menu_travel_partners_travelers"
-              name="Travelers"
-              parent="travel_core.menu_travel_crm_root"
-              action="action_travel_partners"
-              sequence="20"/>
 </odoo>
