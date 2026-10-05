@@ -23,13 +23,8 @@ Star Travels Luxury Admin Theme
     'data': [
         'views/webclient_templates.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'travel_theme/static/src/scss/variables.scss',
-            'travel_theme/static/src/scss/theme.scss',
-        ],
-    },
+    'assets': {},
     'installable': True,
     'application': False,
-    'auto_install': True,
+    'auto_install': False,
 }
