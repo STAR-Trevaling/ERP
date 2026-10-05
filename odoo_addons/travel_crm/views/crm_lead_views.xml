@@ -58,25 +58,23 @@
         </field>
     </record>
 
-    <!-- Action for Travel Leads -->
-    <record id="action_travel_crm_leads" model="ir.actions.act_window">
-        <field name="name">Travel Inquiries &amp; Leads</field>
-        <field name="res_model">crm.lead</field>
-        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
-        <field name="context">{
-            'default_type': 'lead',
-            'search_default_assigned_to_me': 0,
-        }</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No travel inquiries yet. Inquiries from the website and social channels will appear here automatically!
-            </p>
+    <!-- Inherit CRM Filter / Search View -->
+    <record id="view_crm_case_opportunities_filter_inherit_travel" model="ir.ui.view">
+        <field name="name">crm.lead.search.inherit.travel</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='assigned_to_me']" position="after">
+                <separator/>
+                <filter string="Travel Inquiries" name="travel_inquiries" domain="[('source_system', '!=', False)]"/>
+                <filter string="From Website" name="from_website" domain="[('source_system', '=', 'website')]"/>
+                <filter string="From Mobile App" name="from_mobile_app" domain="[('source_system', '=', 'mobile_app')]"/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Source Channel" name="groupby_source_system" context="{'group_by': 'source_system'}"/>
+                <filter string="Destination" name="groupby_destination" context="{'group_by': 'destination_interest_id'}"/>
+                <filter string="Inquiry Type" name="groupby_inquiry_type" context="{'group_by': 'inquiry_type'}"/>
+            </xpath>
         </field>
     </record>
-
-    <menuitem id="menu_travel_crm_leads"
-              name="Inquiries &amp; Leads"
-              parent="travel_core.menu_travel_crm_root"
-              action="action_travel_crm_leads"
-              sequence="10"/>
 </odoo>

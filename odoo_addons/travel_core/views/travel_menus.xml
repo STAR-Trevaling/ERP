@@ -6,11 +6,6 @@
               web_icon="travel_core,static/description/icon.png"
               sequence="15"/>
 
-    <!-- CRM Submenu -->
-    <menuitem id="menu_travel_crm_root"
-              name="CRM &amp; Inquiries"
-              parent="menu_travel_root"
-              sequence="10"/>
 
     <!-- CMS Submenu -->
     <menuitem id="menu_travel_cms_root"
