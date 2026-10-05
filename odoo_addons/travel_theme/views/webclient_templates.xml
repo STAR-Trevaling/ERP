@@ -5,5 +5,10 @@
         <xpath expr="//title" position="replace">
             <title>Star Travels | Trung Tâm Điều Hành Nền Tảng</title>
         </xpath>
+        <xpath expr="//title" position="after">
+            <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Poppins:wght@400;500;600;700&amp;display=swap"/>
+        </xpath>
     </template>
 </odoo>
