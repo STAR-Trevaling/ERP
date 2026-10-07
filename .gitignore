@@ -11,10 +11,12 @@ venv/
 *.sqlite
 *.sqlite3
 
-# Pytest
+# Pytest & Ruff
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
+scratch/
 
 # Node
 node_modules/

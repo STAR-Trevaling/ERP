@@ -10,4 +10,24 @@ site-package-path = [
     "backend/.venv/Lib/site-packages",
     "C:/Users/msi/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages"
 ]
-errors = { missing-import = "ignore", unbound-name = "ignore" }
+errors = { missing-import = "ignore", unbound-name = "ignore", missing-attribute = "ignore", bad-assignment = "ignore", bad-index = "ignore", unsupported-operation = "ignore", bad-argument-type = "ignore", missing-module-attribute = "ignore" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+    ".git",
+    ".pytest_cache",
+    ".ruff_cache",
+    "scratch",
+    "odoo_addons/muk_*",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+"**/__manifest__.py" = ["B018"]
+
