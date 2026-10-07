@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-from odoo.tests.common import TransactionCase
-from odoo.exceptions import ValidationError
-try:
-    import psycopg2
-except ImportError:
-    class psycopg2:
-        class IntegrityError(Exception): pass
+import psycopg2
 
+from odoo.tests.common import TransactionCase
 
 
 class TestTravelCore(TransactionCase):
@@ -19,39 +13,37 @@ class TestTravelCore(TransactionCase):
     def test_category_creation_and_slug_generation(self):
         """Test category creation and slug generation."""
         category = self.category_model.create({
-            'name': 'Scenic Nature & Lakes',
-            'slug': 'scenic-nature-lakes',
+            'name': 'Scenic Nature & Lakes Test',
+            'slug': 'test-scenic-nature-lakes',
             'icon': 'mountain',
         })
-        self.assertEqual(category.name, 'Scenic Nature & Lakes')
-        self.assertEqual(category.slug, 'scenic-nature-lakes')
+        self.assertEqual(category.name, 'Scenic Nature & Lakes Test')
+        self.assertEqual(category.slug, 'test-scenic-nature-lakes')
         self.assertTrue(category.active)
 
     def test_category_slug_uniqueness(self):
         """Test category slug unique constraint."""
         self.category_model.create({
-            'name': 'Historical Sites',
-            'slug': 'historical-sites',
+            'name': 'Historical Sites Test',
+            'slug': 'test-historical-sites',
         })
-        with self.assertRaises(psycopg2.IntegrityError):
-            with self.cr.savepoint():
-                self.category_model.create({
-                    'name': 'Other Historical Sites',
-                    'slug': 'historical-sites',
-                })
+        with self.assertRaises(psycopg2.IntegrityError), self.cr.savepoint():
+            self.category_model.create({
+                'name': 'Other Historical Sites Test',
+                'slug': 'test-historical-sites',
+            })
 
     def test_amenity_creation(self):
         """Test amenity creation and code uniqueness."""
         amenity = self.amenity_model.create({
-            'name': 'Free High Speed Wi-Fi',
-            'code': 'free_wifi',
+            'name': 'Free High Speed Wi-Fi Test',
+            'code': 'test_free_wifi',
             'category': 'general',
             'icon': 'wifi',
         })
-        self.assertEqual(amenity.code, 'free_wifi')
-        with self.assertRaises(psycopg2.IntegrityError):
-            with self.cr.savepoint():
-                self.amenity_model.create({
-                    'name': 'Duplicate Wi-Fi',
-                    'code': 'free_wifi',
-                })
+        self.assertEqual(amenity.code, 'test_free_wifi')
+        with self.assertRaises(psycopg2.IntegrityError), self.cr.savepoint():
+            self.amenity_model.create({
+                'name': 'Duplicate Wi-Fi Test',
+                'code': 'test_free_wifi',
+            })
