@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- ========================================================================= -->
+        <!-- 1. 12 VIETNAM DESTINATIONS (ODOO CMS AUTHORING SEED)                     -->
+        <!-- ========================================================================= -->
+        <record id="dest_ha_long" model="travel.destination">
+            <field name="name">Vịnh Hạ Long</field>
+            <field name="slug">ha-long</field>
+            <field name="public_id">ha-long</field>
+            <field name="country">Quảng Ninh, Việt Nam</field>
+            <field name="summary">Kỳ quan thiên nhiên thế giới UNESCO với hàng ngàn đảo đá vôi kỳ vĩ và làn nước xanh ngọc bích.</field>
+            <field name="description"><![CDATA[<p>Vịnh Hạ Long là niềm tự hào của du lịch Việt Nam, nơi du khách đắm mình giữa khung cảnh non nước ngoạn mục với hơn 1.600 hòn đảo đá vôi lớn nhỏ, những hang động thạch nhũ hàng triệu năm tuổi và trải nghiệm du thuyền đêm ngắm bình minh tuyệt mỹ.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="hero_image_url">https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="starting_price">1800000</field>
+            <field name="latitude">20.9101</field>
+            <field name="longitude">107.0844</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_hoi_an" model="travel.destination">
+            <field name="name">Phố cổ Hội An</field>
+            <field name="slug">hoi-an</field>
+            <field name="public_id">hoi-an</field>
+            <field name="country">Quảng Nam, Việt Nam</field>
+            <field name="summary">Phố cổ di sản rực rỡ sắc màu đèn lồng, những mái ngói rêu phong và con thuyền hoa đăng trên sông Hoài thơ mộng.</field>
+            <field name="description"><![CDATA[<p>Hội An bảo tồn gần như nguyên vẹn quần thể kiến trúc đô thị cổ từ thế kỷ 17 với chùa Cầu cổ kính, các hội quán người Hoa và nền ẩm thực trứ danh như cao lầu, bánh mì Phượng, mì Quảng.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="hero_image_url">https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="starting_price">1200000</field>
+            <field name="latitude">15.8801</field>
+            <field name="longitude">108.3272</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_phu_quoc" model="travel.destination">
+            <field name="name">Đảo Ngọc Phú Quốc</field>
+            <field name="slug">phu-quoc</field>
+            <field name="public_id">phu-quoc</field>
+            <field name="country">Kiên Giang, Việt Nam</field>
+            <field name="summary">Thiên đường biển nhiệt đới với bờ cát trắng mịn Bãi Khem, hoàng hôn rực rỡ và làn nước trong vắt.</field>
+            <field name="description"><![CDATA[<p>Phú Quốc nổi danh với những bãi biển hoang sơ, trải nghiệm lặn ngắm san hô tại quần đảo An Thới, cáp treo vượt biển dài nhất thế giới và các khu nghỉ dưỡng 5 sao sang trọng.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/3/33/Kem_Beach_aerial_view_Phu_Quoc_Island_Vietnam.jpg</field>
+            <field name="hero_image_url">https://upload.wikimedia.org/wikipedia/commons/3/33/Kem_Beach_aerial_view_Phu_Quoc_Island_Vietnam.jpg</field>
+            <field name="starting_price">2200000</field>
+            <field name="latitude">10.2899</field>
+            <field name="longitude">103.9840</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_sa_pa" model="travel.destination">
+            <field name="name">Sa Pa &amp; Fansipan</field>
+            <field name="slug">sa-pa</field>
+            <field name="public_id">sa-pa</field>
+            <field name="country">Lào Cai, Việt Nam</field>
+            <field name="summary">Thị trấn sương mờ Tây Bắc ôm trọn thung lũng Mường Hoa và đỉnh Fansipan 3.143m ngút ngàn mây trắng.</field>
+            <field name="description"><![CDATA[<p>Sa Pa mang vẻ đẹp hùng vĩ của ruộng bậc thang kỳ vĩ vào mùa lúa chín, khí hậu mát mẻ bốn mùa và nét văn hóa đậm đà của đồng bào H'Mông, Dao đỏ.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/f/fd/Terraced_fields_Sa_Pa_Vietnam.JPG</field>
+            <field name="hero_image_url">https://upload.wikimedia.org/wikipedia/commons/f/fd/Terraced_fields_Sa_Pa_Vietnam.JPG</field>
+            <field name="starting_price">1500000</field>
+            <field name="latitude">22.3364</field>
+            <field name="longitude">103.8438</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_da_lat" model="travel.destination">
+            <field name="name">Đà Lạt</field>
+            <field name="slug">da-lat</field>
+            <field name="public_id">da-lat</field>
+            <field name="country">Lâm Đồng, Việt Nam</field>
+            <field name="summary">Thành phố ngàn hoa cao nguyên với rừng thông xanh ngát, hồ Tuyền Lâm phẳng lặng và khí hậu se lạnh dịu dàng.</field>
+            <field name="description"><![CDATA[<p>Đà Lạt là điểm đến lãng mạn bậc nhất xứ sở sương mù với những quán cà phê view thung lũng, dinh thự cổ điển thời Pháp và vườn dâu tây chín mọng.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/e/e2/Da_Lat_-_Viet_Nam.jpg</field>
+            <field name="hero_image_url">https://upload.wikimedia.org/wikipedia/commons/e/e2/Da_Lat_-_Viet_Nam.jpg</field>
+            <field name="starting_price">1100000</field>
+            <field name="latitude">11.9404</field>
+            <field name="longitude">108.4583</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_ninh_binh" model="travel.destination">
+            <field name="name">Tràng An - Ninh Bình</field>
+            <field name="slug">ninh-binh</field>
+            <field name="public_id">ninh-binh</field>
+            <field name="country">Ninh Bình, Việt Nam</field>
+            <field name="summary">Di sản hỗn hợp Văn hóa &amp; Thiên nhiên Tràng An với quần thể núi đá vôi ngập nước và Tam Cốc Bích Động.</field>
+            <field name="description"><![CDATA[<p>Ninh Bình mê hoặc du khách bởi những chuyến đò nan lướt trên dòng sông Ngô Đồng uốn lượn qua những cánh đồng lúa vàng óng và những hang động huyền bí.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/5/5b/Vietnam%2C_Ninh_Binh%2C_Limestone_peaks.jpg</field>
+            <field name="hero_image_url">https://upload.wikimedia.org/wikipedia/commons/5/5b/Vietnam%2C_Ninh_Binh%2C_Limestone_peaks.jpg</field>
+            <field name="starting_price">950000</field>
+            <field name="latitude">20.2506</field>
+            <field name="longitude">105.9745</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_hue" model="travel.destination">
+            <field name="name">Cố đô Huế</field>
+            <field name="slug">hue</field>
+            <field name="public_id">hue</field>
+            <field name="country">Thừa Thiên Huế, Việt Nam</field>
+            <field name="summary">Di sản Cố đô triều Nguyễn uy nghiêm bên dòng sông Hương êm đềm và tiếng chuông chùa Thiên Mụ trầm mặc.</field>
+            <field name="description"><![CDATA[<p>Huế trầm mặc với Đại Nội nguy nga, các lăng tẩm hoàng gia kỳ công và nghệ thuật nhã nhạc cung đình Huế được UNESCO vinh danh.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/0/0e/Ngo_Mon.jpg</field>
+            <field name="hero_image_url">https://upload.wikimedia.org/wikipedia/commons/0/0e/Ngo_Mon.jpg</field>
+            <field name="starting_price">1300000</field>
+            <field name="latitude">16.4637</field>
+            <field name="longitude">107.5909</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_ha_giang" model="travel.destination">
+            <field name="name">Hà Giang</field>
+            <field name="slug">ha-giang</field>
+            <field name="public_id">ha-giang</field>
+            <field name="country">Hà Giang, Việt Nam</field>
+            <field name="summary">Cao nguyên đá Đồng Văn hùng vĩ, hẻm vực Tu Sản sâu nhất Đông Nam Á và đèo Mã Pí Lèng huyền thoại.</field>
+            <field name="description"><![CDATA[<p>Hà Giang là thử thách mê hoặc đối với những phượt thủ yêu thích khám phá vẻ đẹp ngoạn mục của dòng sông Nho Quế xanh như ngọc và mùa hoa tam giác mạch rực rỡ.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/0/0f/Mountain_road_at_M%C3%A3_P%C3%AD_L%C3%A8ng_Pass%2C_H%C3%A0_Giang_Province%2C_Vietnam.jpg</field>
+            <field name="hero_image_url">https://upload.wikimedia.org/wikipedia/commons/0/0f/Mountain_road_at_M%C3%A3_P%C3%AD_L%C3%A8ng_Pass%2C_H%C3%A0_Giang_Province%2C_Vietnam.jpg</field>
+            <field name="starting_price">1650000</field>
+            <field name="latitude">22.8233</field>
+            <field name="longitude">104.9839</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_ta_xua" model="travel.destination">
+            <field name="name">Tà Xùa</field>
+            <field name="slug">ta-xua</field>
+            <field name="public_id">ta-xua</field>
+            <field name="country">Sơn La, Việt Nam</field>
+            <field name="summary">Thiên đường săn mây bồng bềnh lưng chừng trời với sống lưng khủng long kỳ vĩ.</field>
+            <field name="description"><![CDATA[<p>Tà Xùa là điểm đến săn mây nổi tiếng vùng Tây Bắc, nơi bạn có thể ngắm nhìn biển mây cuồn cuộn trôi qua các thung lũng sâu trong nắng sớm.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="hero_image_url">https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="starting_price">850000</field>
+            <field name="latitude">21.2800</field>
+            <field name="longitude">104.3500</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_da_nang" model="travel.destination">
+            <field name="name">Đà Nẵng</field>
+            <field name="slug">da-nang</field>
+            <field name="public_id">da-nang</field>
+            <field name="country">Đà Nẵng, Việt Nam</field>
+            <field name="summary">Thành phố biển hiện đại, cầu Rồng phun lửa, bãi biển Mỹ Khê và bán đảo Sơn Trà xanh ngát.</field>
+            <field name="description"><![CDATA[<p>Đà Nẵng kết hợp hoàn hảo giữa năng động hiện đại và vẻ đẹp thiên nhiên với Bà Nà Hills, cầu Vàng trên mây và bãi biển quyến rũ hàng đầu hành tinh.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="hero_image_url">https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="starting_price">1400000</field>
+            <field name="latitude">16.0544</field>
+            <field name="longitude">108.2022</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_phong_nha" model="travel.destination">
+            <field name="name">Phong Nha - Kẻ Bàng</field>
+            <field name="slug">phong-nha</field>
+            <field name="public_id">phong-nha</field>
+            <field name="country">Quảng Bình, Việt Nam</field>
+            <field name="summary">Vương quốc hang động thế giới với Động Thiên Đường lộng lẫy và Sơn Đoòng kỳ vĩ bậc nhất hành tinh.</field>
+            <field name="description"><![CDATA[<p>Di sản thiên nhiên thế giới UNESCO Phong Nha - Kẻ Bàng sở hữu hệ thống hang động đá vôi cổ nhất châu Á cùng các dòng sông ngầm thám hiểm bất tận.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="hero_image_url">https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="starting_price">1750000</field>
+            <field name="latitude">17.5833</field>
+            <field name="longitude">106.2833</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="dest_con_dao" model="travel.destination">
+            <field name="name">Côn Đảo</field>
+            <field name="slug">con-dao</field>
+            <field name="public_id">con-dao</field>
+            <field name="country">Bà Rịa - Vũng Tàu, Việt Nam</field>
+            <field name="summary">Quần đảo huyền thoại ngoài khơi biển Nam Bộ với bãi biển Đầm Trầu hoang sơ và rừng nguyên sinh bí ẩn.</field>
+            <field name="description"><![CDATA[<p>Côn Đảo là nơi hòa quyện giữa dấu ấn lịch sử hào hùng, bãi biển hoang sơ tuyệt đối và trải nghiệm xem rùa đẻ trứng hiếm có tại Vườn quốc gia Côn Đảo.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="hero_image_url">https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="starting_price">2500000</field>
+            <field name="latitude">8.6835</field>
+            <field name="longitude">106.6074</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <!-- ========================================================================= -->
+        <!-- 2. 9 PLACES & EXPERIENCES (ODOO CMS AUTHORING SEED)                      -->
+        <!-- ========================================================================= -->
+        <record id="place_canal_cruise" model="travel.place">
+            <field name="name">Du ngoạn vịnh Hạ Long trên du thuyền sang trọng</field>
+            <field name="slug">canal-cruise</field>
+            <field name="public_id">canal-cruise</field>
+            <field name="destination_id" ref="dest_ha_long"/>
+            <field name="category_id" ref="travel_core.category_du_thuyen"/>
+            <field name="short_description">Thư giãn trên du thuyền 5 sao lướt êm qua hàng ngàn đảo đá vôi kỳ vĩ và thưởng ngoạn hoàng hôn biển.</field>
+            <field name="description"><![CDATA[<p>Tận hưởng dịch vụ chuẩn quốc tế với phòng nghỉ view biển toàn cảnh, thưởng thức hải sản thượng hạng và tham gia các hoạt động chèo kayak, câu mực đêm.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Cảng tàu khách quốc tế Tuần Châu, Hạ Long, Quảng Ninh</field>
+            <field name="latitude">20.9101</field>
+            <field name="longitude">107.0844</field>
+            <field name="average_rating">4.9</field>
+            <field name="review_count">128</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_sailing" model="travel.place">
+            <field name="name">Trải nghiệm lướt thuyền buồm trên vịnh biển</field>
+            <field name="slug">sailing</field>
+            <field name="public_id">sailing</field>
+            <field name="destination_id" ref="dest_ha_long"/>
+            <field name="category_id" ref="travel_core.category_the_thao_nuoc"/>
+            <field name="short_description">Cảm nhận luồng gió biển khơi và chinh phục những con sóng êm đềm trên cánh buồm trắng.</field>
+            <field name="description"><![CDATA[<p>Khóa huấn luyện và trải nghiệm lái thuyền buồm cơ bản cùng chuyên gia quốc tế giữa không gian kỳ vĩ của di sản Hạ Long.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Vịnh Bái Tử Long, Cẩm Phả, Quảng Ninh</field>
+            <field name="latitude">20.9500</field>
+            <field name="longitude">107.2000</field>
+            <field name="average_rating">4.8</field>
+            <field name="review_count">64</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_hiking" model="travel.place">
+            <field name="name">Trekking chinh phục nóc nhà Đông Dương Fansipan</field>
+            <field name="slug">hiking</field>
+            <field name="public_id">hiking</field>
+            <field name="destination_id" ref="dest_sa_pa"/>
+            <field name="category_id" ref="travel_core.category_trekking_leo_nui"/>
+            <field name="short_description">Hành trình thử thách sức bền vượt rừng trúc nguyên sinh chạm mốc đỉnh cao 3.143m.</field>
+            <field name="description"><![CDATA[<p>Cung đường leo núi mạo hiểm dành cho những trái tim đam mê khám phá thiên nhiên hoang sơ và thảm thực vật đặc hữu của dãy Hoàng Liên Sơn.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Vườn quốc gia Hoàng Liên, Sa Pa, Lào Cai</field>
+            <field name="latitude">22.3033</field>
+            <field name="longitude">103.7750</field>
+            <field name="average_rating">4.95</field>
+            <field name="review_count">210</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_camping" model="travel.place">
+            <field name="name">Cắm trại săn mây đỉnh Tà Xùa</field>
+            <field name="slug">camping</field>
+            <field name="public_id">camping</field>
+            <field name="destination_id" ref="dest_ta_xua"/>
+            <field name="category_id" ref="travel_core.category_cam_trai_da_ngoai"/>
+            <field name="short_description">Thức giấc giữa biển mây trắng ngút ngàn và tận hưởng khí trời trong lành vùng cao.</field>
+            <field name="description"><![CDATA[<p>Trải nghiệm cắm trại qua đêm, quây quần bên đống lửa ấm, thưởng thức thịt nướng bản địa và đón những tia nắng đầu tiên xuyên qua thung lũng mây.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Sống lưng khủng long, Tà Xùa, Bắc Yên, Sơn La</field>
+            <field name="latitude">21.2800</field>
+            <field name="longitude">104.3500</field>
+            <field name="average_rating">4.85</field>
+            <field name="review_count">92</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_scuba_diving" model="travel.place">
+            <field name="name">Lặn biển ngắm rạn san hô Hòn Thơm Phú Quốc</field>
+            <field name="slug">scuba-diving</field>
+            <field name="public_id">scuba-diving</field>
+            <field name="destination_id" ref="dest_phu_quoc"/>
+            <field name="category_id" ref="travel_core.category_lan_bien_san_ho"/>
+            <field name="short_description">Khám phá lòng đại dương và hệ sinh thái san hô rực rỡ nhất Nam đảo.</field>
+            <field name="description"><![CDATA[<p>Trang bị đồ lặn chuyên nghiệp cùng huấn luyện viên bản địa tận tình hướng dẫn khám phá những cụm san hô bàn, san hô cành nhiều màu sắc.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Quần đảo An Thới, Nam Phú Quốc, Kiên Giang</field>
+            <field name="latitude">10.0150</field>
+            <field name="longitude">104.0150</field>
+            <field name="average_rating">4.9</field>
+            <field name="review_count">145</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_ha_long_cruise" model="travel.place">
+            <field name="name">Hải trình 2 ngày 1 đêm du thuyền Hạ Long cao cấp</field>
+            <field name="slug">ha-long-cruise</field>
+            <field name="public_id">ha-long-cruise</field>
+            <field name="destination_id" ref="dest_ha_long"/>
+            <field name="category_id" ref="travel_core.category_du_thuyen"/>
+            <field name="short_description">Khám phá hang Sửng Sốt, chèo thuyền kayak hang Luồn và tắm biển đảo Ti Tốp.</field>
+            <field name="description"><![CDATA[<p>Hành trình trọn gói bao gồm tất cả các bữa ăn Á-Âu thượng hạng, lớp học nấu ăn truyền thống trên boong tàu và trà chiều ngắm hoàng hôn vịnh biển.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Cảng quốc tế Hạ Long, Bãi Cháy, Quảng Ninh</field>
+            <field name="latitude">20.9500</field>
+            <field name="longitude">107.0500</field>
+            <field name="average_rating">4.92</field>
+            <field name="review_count">188</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_kayak_lan_ha" model="travel.place">
+            <field name="name">Chèo thuyền Kayak khám phá vịnh Lan Hạ hoang sơ</field>
+            <field name="slug">kayak-lan-ha</field>
+            <field name="public_id">kayak-lan-ha</field>
+            <field name="destination_id" ref="dest_ha_long"/>
+            <field name="category_id" ref="travel_core.category_kayak_the_thao_nuoc"/>
+            <field name="short_description">Luồn lách qua những vòm hang đá vôi kỳ vĩ và tắm biển tại những bãi cát tự nhiên ẩn mình.</field>
+            <field name="description"><![CDATA[<p>Tự tay chèo lái con thuyền nhỏ lướt qua làng chài cổ Cái Bèo, ngắm nhìn thảm thực vật nhiệt đới xanh mướt ôm trọn các vách núi đá vôi dựng đứng.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Vịnh Lan Hạ, Cát Bà, Hải Phòng</field>
+            <field name="latitude">20.7333</field>
+            <field name="longitude">107.0500</field>
+            <field name="average_rating">4.88</field>
+            <field name="review_count">76</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_hoi_an_lantern_boat" model="travel.place">
+            <field name="name">Dạo thuyền hoa đăng sông Hoài phố cổ Hội An</field>
+            <field name="slug">hoi-an-lantern-boat</field>
+            <field name="public_id">hoi-an-lantern-boat</field>
+            <field name="destination_id" ref="dest_hoi_an"/>
+            <field name="category_id" ref="travel_core.category_van_hoa_di_san"/>
+            <field name="short_description">Thả hoa đăng ước nguyện và ngắm nhìn phố cổ Hội An lung linh dưới ánh đèn lồng.</field>
+            <field name="description"><![CDATA[<p>Khi màn đêm buông xuống, ngồi trên con thuyền gỗ mộc mạc ngắm nhìn dãy nhà cổ soi bóng xuống mặt nước lấp lánh hoa đăng là trải nghiệm đậm chất thơ.</p>]]></field>
+            <field name="image_url">https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="address">Bến thuyền sông Hoài, Phố cổ Hội An, Quảng Nam</field>
+            <field name="latitude">15.8801</field>
+            <field name="longitude">108.3272</field>
+            <field name="average_rating">4.94</field>
+            <field name="review_count">320</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="place_trang_an_boat_tour" model="travel.place">
+            <field name="name">Thuyền nan khám phá quần thể hang động Tràng An</field>
+            <field name="slug">trang-an-boat-tour</field>
+            <field name="public_id">trang-an-boat-tour</field>
+            <field name="destination_id" ref="dest_ninh_binh"/>
+            <field name="category_id" ref="travel_core.category_van_hoa_di_san"/>
+            <field name="short_description">Xuôi dòng nước trong vắt lướt qua những thung lũng đá vôi ngập nước kỳ ảo.</field>
+            <field name="description"><![CDATA[<p>Các cô lái đò bản địa sẽ đưa du khách đi xuyên qua chuỗi hang động tự nhiên huyền bí, ghé thăm Hành cung Vũ Lâm và phim trường Kong Skull Island nổi tiếng.</p>]]></field>
+            <field name="image_url">https://upload.wikimedia.org/wikipedia/commons/5/5b/Vietnam%2C_Ninh_Binh%2C_Limestone_peaks.jpg</field>
+            <field name="address">Khu du lịch sinh thái Tràng An, Hoa Lư, Ninh Bình</field>
+            <field name="latitude">20.2550</field>
+            <field name="longitude">105.9050</field>
+            <field name="average_rating">4.96</field>
+            <field name="review_count">410</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <!-- ========================================================================= -->
+        <!-- 3. 5 TRAVEL ARTICLES & STORIES (ODOO CMS AUTHORING SEED)                 -->
+        <!-- ========================================================================= -->
+        <record id="article_hanh_trinh_xuyen_viet" model="travel.article">
+            <field name="title">Hành trình xuyên Việt: Chạm vào vẻ đẹp kỳ quan và chiều sâu di sản</field>
+            <field name="slug">hanh-trinh-xuyen-viet</field>
+            <field name="public_id">hanh-trinh-xuyen-viet</field>
+            <field name="destination_id" ref="dest_ha_long"/>
+            <field name="excerpt">Hành trình khám phá văn hóa, ẩm thực và cảnh sắc tuyệt mỹ từ Bắc vào Nam trên dải đất hình chữ S.</field>
+            <field name="body"><![CDATA[<p>Việt Nam không chỉ là một điểm đến du lịch, mà là một bản giao hưởng tuyệt sắc của thiên nhiên và lịch sử ngàn năm văn hiến. Bắt đầu từ những dãy núi trùng điệp mờ sương của vùng cao Tây Bắc, xuôi về kỳ quan vịnh Hạ Long kỳ vĩ, rồi dừng chân bên những mái ngói rêu phong của phố cổ Hội An, mỗi bước chân đều mở ra một trải nghiệm độc bản.</p><p>Hãy đi chậm lại, trò chuyện cùng người dân bản địa, thưởng thức một bát phở nóng hổi hay ly cà phê sữa đá vỉa hè. Đó chính là cách bạn cảm nhận trọn vẹn nhịp đập tâm hồn của đất nước này.</p>]]></field>
+            <field name="cover_image">https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="article_cam_nang_am_thuc_hoi_an" model="travel.article">
+            <field name="title">Cẩm nang ẩm thực phố cổ: Những hương vị bản địa không thể bỏ lỡ</field>
+            <field name="slug">cam-nang-am-thuc-hoi-an</field>
+            <field name="public_id">cam-nang-am-thuc-hoi-an</field>
+            <field name="destination_id" ref="dest_hoi_an"/>
+            <field name="excerpt">Khám phá thế giới ẩm thực phong phú của Hội An: cao lầu, mì Quảng, cơm gà và bánh mì nức tiếng.</field>
+            <field name="body"><![CDATA[<p>Ẩm thực Hội An là sự kết tinh tinh tế giữa các nền văn hóa Việt - Hoa - Nhật qua nhiều thế kỷ giao thương. Mỗi món ăn nơi đây không chỉ mang hương vị đậm đà khó quên mà còn chứa đựng cả một câu chuyện lịch sử.</p><p>Đừng quên ghé chợ Hội An vào sáng sớm để thưởng thức tô cao lầu với sợi mì dai vàng óng làm từ nước giếng Bá Lễ, hay ổ bánh mì giòn rụm với pate thơm nức lòng du khách gần xa.</p>]]></field>
+            <field name="cover_image">https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="article_bi_quyet_san_may_ta_xua" model="travel.article">
+            <field name="title">Bí quyết săn mây Tà Xùa: Thời điểm lý tưởng và kinh nghiệm trekking</field>
+            <field name="slug">bi-quyet-san-may-ta-xua</field>
+            <field name="public_id">bi-quyet-san-may-ta-xua</field>
+            <field name="destination_id" ref="dest_ta_xua"/>
+            <field name="excerpt">Kinh nghiệm bỏ túi để săn được biển mây bồng bềnh hoàn hảo tại sống lưng khủng long Tà Xùa.</field>
+            <field name="body"><![CDATA[<p>Tà Xùa từ tháng 10 đến tháng 4 hàng năm là khoảng thời gian vàng để bắt trọn những khoảnh khắc biển mây trắng xoá cuồn cuộn dưới thung lũng. Hãy chuẩn bị áo ấm, giày leo núi có độ bám tốt và theo dõi sát dự báo thời tiết trước chuyến đi.</p>]]></field>
+            <field name="cover_image">https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="article_kinh_nghiem_du_thuyen_ha_long" model="travel.article">
+            <field name="title">Kinh nghiệm chọn tour du thuyền vịnh Hạ Long chuẩn 5 sao</field>
+            <field name="slug">kinh-nghiem-du-thuyen-ha-long</field>
+            <field name="public_id">kinh-nghiem-du-thuyen-ha-long</field>
+            <field name="destination_id" ref="dest_ha_long"/>
+            <field name="excerpt">So sánh các hải trình du thuyền vịnh Hạ Long và vịnh Lan Hạ, tư vấn chọn cabin ban công riêng view biển.</field>
+            <field name="body"><![CDATA[<p>Để chuyến nghỉ dưỡng trên vịnh biển trọn vẹn, việc lựa chọn du thuyền phù hợp với nhu cầu gia đình hay cặp đôi là điều vô cùng quan trọng. Bài viết phân tích chi tiết ưu điểm của hải trình 2 ngày 1 đêm và 3 ngày 2 đêm trên các dòng tàu kim loại hiện đại bậc nhất.</p>]]></field>
+            <field name="cover_image">https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+
+        <record id="article_lan_ngam_san_ho_phu_quoc" model="travel.article">
+            <field name="title">Hướng dẫn lặn biển ngắm san hô an toàn tại quần đảo An Thới</field>
+            <field name="slug">lan-ngam-san-ho-phu-quoc</field>
+            <field name="public_id">lan-ngam-san-ho-phu-quoc</field>
+            <field name="destination_id" ref="dest_phu_quoc"/>
+            <field name="excerpt">Cẩm nang lặn biển ngắm san hô với bình dưỡng khí (Scuba Diving) và ống thở (Snorkeling) tại Phú Quốc.</field>
+            <field name="body"><![CDATA[<p>Quần đảo An Thới với Hòn Gầm Ghì, Hòn Mây Rút và Hòn Móng Tay sở hữu những thảm san hô tự nhiên đẹp nhất Việt Nam. Hãy lưu ý quy tắc bảo vệ môi trường biển: không chạm vào san hô và sử dụng kem chống nắng thân thiện với rạn san hô.</p>]]></field>
+            <field name="cover_image">https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</field>
+            <field name="state">published</field>
+            <field name="version">1</field>
+            <field name="published_at" eval="datetime.now()"/>
+        </record>
+    </data>
+</odoo>
