@@ -4,7 +4,8 @@
 [![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16--alpine-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose_v2-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Tests-30%2F30_Passing-brightgreen?logo=pytest&logoColor=white)](#kiểm-thử-toàn-diện-testing-suite)
+[![CI](https://github.com/huynguyen2k5/ERP/actions/workflows/ci.yml/badge.svg)](https://github.com/huynguyen2k5/ERP/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/Tests-33%2F33_Passing-brightgreen?logo=pytest&logoColor=white)](#kiểm-thử-toàn-diện-testing-suite)
 [![Code Style](https://img.shields.io/badge/Code_Style-Ruff-black?logo=ruff&logoColor=white)](https://github.com/astral-sh/ruff)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean_Monolith-00C7B7)](#kiến-trúc-hệ-thống)
 
@@ -189,14 +190,26 @@ docker exec -i odoo18_app odoo -d odoo_travel --http-port 8070 \
 python -m pytest tests -v
 ```
 
-### Lệnh kiểm tra chất lượng mã nguồn (Linter & Types)
+### Lệnh kiểm tra chất lượng mã nguồn & CI Pre-Flight
 ```bash
-# Kiểm tra định dạng & linting bằng Ruff
+# 1. Chạy toàn bộ các chặng CI Pre-Flight tại local trước khi push
+python scripts/run_local_ci.py
+
+# 2. Kiểm tra định dạng & linting độc lập bằng Ruff
 python -m ruff check .
 
-# Kiểm tra tĩnh Type Checking bằng Pyright
+# 3. Kiểm tra tĩnh Type Checking bằng Pyright
 npx pyright
 ```
+
+---
+
+### Tự Động Hóa CI/CD (GitHub Actions)
+Quy trình CI tự động được định nghĩa tại [.github/workflows/ci.yml](file:///d:/Joyce/My%20documents/Pjs/Pjs%20src/ERP/.github/workflows/ci.yml), tự động kích hoạt khi có Pull Request hoặc Push vào nhánh `main`:
+1. **Linting & Code Quality**: Kiểm tra Ruff, cú pháp tất cả XML Views và JSON Data Contracts.
+2. **Odoo 18 Native Test Suite**: Chạy 21 in-container test cases (DB Savepoint Rollback & HttpCase).
+3. **Live E2E Integration Suite**: Chạy 9 live test cases qua HTTP REST và XML-RPC.
+4. **All CI Quality Gates Passed**: Điều kiện tiên quyết (Status Check) để cho phép merge PR.
 
 ---
 
