@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
 import re
+
+from odoo import api, fields, models
 
 
 class TravelCategory(models.Model):
