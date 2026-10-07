@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
-import json
 import hashlib
+import json
 import logging
+
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class TravelIntegrationEvent(models.Model):
     res_id = fields.Integer(string="Target Record ID", readonly=True)
 
     _sql_constraints = [
-        ('source_event_uniq', 'unique(source, external_event_id)', 
+        ('source_event_uniq', 'unique(source, external_event_id)',
          'An event with this ID from this source has already been recorded (Idempotency Violation)!'),
     ]
 
@@ -140,6 +141,7 @@ class TravelIntegrationEvent(models.Model):
         elif event_type in ('partner.application.created', 'partner_application') or 'business_name' in data:
             app_vals = {
                 'business_name': data.get('business_name'),
+                'organization_slug': data.get('organization_slug') or '',
                 'email': data.get('email'),
                 'phone': data.get('phone') or '',
                 'website': data.get('website') or '',

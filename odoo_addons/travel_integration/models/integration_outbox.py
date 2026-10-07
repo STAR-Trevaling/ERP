@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
-from datetime import timedelta
-import json
-import uuid
-import hmac
 import hashlib
-import urllib.request
-import urllib.error
+import hmac
+import json
 import logging
+import urllib.error
+import urllib.request
+import uuid
+from datetime import timedelta
+
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -122,9 +123,9 @@ class TravelIntegrationOutbox(models.Model):
         """Calculate exponential backoff or mark as permanently failed."""
         self.ensure_one()
         new_retry = self.retry_count + 1
-        _logger.warning("Failed delivery for Outbox Event %s (attempt %s/%s): %s", 
+        _logger.warning("Failed delivery for Outbox Event %s (attempt %s/%s): %s",
                        self.event_id, new_retry, self.max_retries, err_msg)
-        
+
         if new_retry >= self.max_retries:
             self.write({
                 'state': 'failed',
