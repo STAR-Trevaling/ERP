@@ -6,6 +6,7 @@ while strictly preserving administrative, internal staff, and Star Travels domai
 """
 import sys
 import xmlrpc.client
+from typing import Any, cast
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -31,7 +32,7 @@ def clean_mock_data():
         print("Failed to authenticate with Odoo.")
         return
 
-    models = xmlrpc.client.ServerProxy(f"{URL}/xmlrpc/2/object")
+    models: Any = xmlrpc.client.ServerProxy(f"{URL}/xmlrpc/2/object")
     print("Authentication successful as UID:", uid)
 
     # -------------------------------------------------------------
@@ -39,21 +40,27 @@ def clean_mock_data():
     # -------------------------------------------------------------
     print("\n--- 1. Rà soát và Dọn dẹp CRM Leads ---")
     # Identify Odoo core demo leads via ir.model.data
-    demo_lead_data = models.execute_kw(
-        DB, uid, PASSWORD, "ir.model.data", "search_read",
-        [[("model", "=", "crm.lead"), ("module", "=", "crm"), ("name", "=like", "crm_case_%")]],
-        {"fields": ["res_id", "name"]}
+    demo_lead_data = cast(
+        list[dict[str, Any]],
+        models.execute_kw(
+            DB, uid, PASSWORD, "ir.model.data", "search_read",
+            [[("model", "=", "crm.lead"), ("module", "=", "crm"), ("name", "=like", "crm_case_%")]],
+            {"fields": ["res_id", "name"]},
+        ),
     )
     demo_lead_ids = [d["res_id"] for d in demo_lead_data if d.get("res_id")]
 
     # Identify transient test leads from automated tests
-    test_lead_ids = models.execute_kw(
-        DB, uid, PASSWORD, "crm.lead", "search",
-        [[
-            "|",
-            ("name", "ilike", "E2E Traveler Test"),
-            ("name", "ilike", "Idempotent Tester")
-        ]]
+    test_lead_ids = cast(
+        list[int],
+        models.execute_kw(
+            DB, uid, PASSWORD, "crm.lead", "search",
+            [[
+                "|",
+                ("name", "ilike", "E2E Traveler Test"),
+                ("name", "ilike", "Idempotent Tester"),
+            ]],
+        ),
     )
 
     lead_ids_to_remove = list(set(demo_lead_ids + test_lead_ids))
@@ -61,9 +68,12 @@ def clean_mock_data():
 
     if lead_ids_to_remove:
         # Check that we do not delete live sync lead
-        live_leads = models.execute_kw(
-            DB, uid, PASSWORD, "crm.lead", "search",
-            [[("phone", "=", "0988776655")]]
+        live_leads = cast(
+            list[int],
+            models.execute_kw(
+                DB, uid, PASSWORD, "crm.lead", "search",
+                [[("phone", "=", "0988776655")]],
+            ),
         )
         safe_lead_ids = [lid for lid in lead_ids_to_remove if lid not in live_leads]
 
@@ -81,42 +91,54 @@ def clean_mock_data():
     # -------------------------------------------------------------
     print("\n--- 2. Rà soát và Dọn dẹp Contacts (res.partner) ---")
     # Identify Odoo core demo partners via ir.model.data
-    demo_partner_data = models.execute_kw(
-        DB, uid, PASSWORD, "ir.model.data", "search_read",
-        [[("model", "=", "res.partner"), ("module", "=", "base"), ("name", "=like", "res_partner_%")]],
-        {"fields": ["res_id", "name"]}
+    demo_partner_data = cast(
+        list[dict[str, Any]],
+        models.execute_kw(
+            DB, uid, PASSWORD, "ir.model.data", "search_read",
+            [[("model", "=", "res.partner"), ("module", "=", "base"), ("name", "=like", "res_partner_%")]],
+            {"fields": ["res_id", "name"]},
+        ),
     )
     demo_partner_ids = [d["res_id"] for d in demo_partner_data if d.get("res_id")]
 
     # Identify transient test partners
-    test_partner_ids = models.execute_kw(
-        DB, uid, PASSWORD, "res.partner", "search",
-        [[
-            "|", "|",
-            ("name", "ilike", "E2E Traveler Test"),
-            ("name", "ilike", "Idempotent Tester"),
-            ("name", "ilike", "Công ty Du lịch E2E")
-        ]]
+    test_partner_ids = cast(
+        list[int],
+        models.execute_kw(
+            DB, uid, PASSWORD, "res.partner", "search",
+            [[
+                "|", "|",
+                ("name", "ilike", "E2E Traveler Test"),
+                ("name", "ilike", "Idempotent Tester"),
+                ("name", "ilike", "Công ty Du lịch E2E"),
+            ]],
+        ),
     )
 
     partner_ids_candidates = list(set(demo_partner_ids + test_partner_ids))
 
     # Strict protection whitelist
-    protected_partners = models.execute_kw(
-        DB, uid, PASSWORD, "res.partner", "search",
-        [[
-            "|", "|",
-            ("id", "in", [1, 2, 3]),
-            ("email", "in", PROTECTED_EMAILS),
-            ("phone", "=", "0988776655")
-        ]]
+    protected_partners = cast(
+        list[int],
+        models.execute_kw(
+            DB, uid, PASSWORD, "res.partner", "search",
+            [[
+                "|", "|",
+                ("id", "in", [1, 2, 3]),
+                ("email", "in", PROTECTED_EMAILS),
+                ("phone", "=", "0988776655"),
+            ]],
+        ),
     )
     # Also protect any partner linked to travel.partner.application
-    app_partner_ids = []
-    apps = models.execute_kw(
-        DB, uid, PASSWORD, "travel.partner.application", "search_read",
-        [[("partner_id", "!=", False)]],
-        {"fields": ["partner_id"]}
+    app_partner_ids: list[int] = []
+    apps = cast(
+        list[dict[str, Any]],
+        models.execute_kw(
+            DB, uid, PASSWORD, "travel.partner.application", "search_read",
+            [[("partner_id", "!=", False)]],
+            {"fields": ["partner_id"]},
+        ),
     )
     for a in apps:
         if a.get("partner_id"):
@@ -147,8 +169,20 @@ def clean_mock_data():
     # -------------------------------------------------------------
     # 3. KIỂM TRA HIỆN TRẠNG SAU KHI DỌN DẸP
     # -------------------------------------------------------------
-    remaining_leads = models.execute_kw(DB, uid, PASSWORD, "crm.lead", "search_read", [[]], {"fields": ["id", "name", "phone", "email_from"]})
-    remaining_partners = models.execute_kw(DB, uid, PASSWORD, "res.partner", "search_read", [[("active", "=", True)]], {"fields": ["id", "name", "email", "phone", "is_company"]})
+    remaining_leads = cast(
+        list[dict[str, Any]],
+        models.execute_kw(
+            DB, uid, PASSWORD, "crm.lead", "search_read", [[]],
+            {"fields": ["id", "name", "phone", "email_from"]},
+        ),
+    )
+    remaining_partners = cast(
+        list[dict[str, Any]],
+        models.execute_kw(
+            DB, uid, PASSWORD, "res.partner", "search_read", [[("active", "=", True)]],
+            {"fields": ["id", "name", "email", "phone", "is_company"]},
+        ),
+    )
 
     print("\n================= HIỆN TRẠNG SAU KHI DỌN DẸP =================")
     print(f"Tổng CRM Leads du lịch thực còn lại: {len(remaining_leads)}")
