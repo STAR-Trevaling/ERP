@@ -73,9 +73,9 @@ class TravelIntegrationOutbox(models.Model):
         if not pending_records:
             return True
 
-        base_url = self.env['ir.config_parameter'].sudo().get_param('travel.public_platform_url', 'http://localhost:8000').rstrip('/')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('travel.public_platform_url', 'http://host.docker.internal:8000').rstrip('/')
         secret = self.env['ir.config_parameter'].sudo().get_param('travel.webhook_secret', 'star_travels_super_secret_webhook_key_2026')
-        endpoint = f"{base_url}/api/integrations/v1/odoo/events"
+        endpoint = f"{base_url}/api/v1/integrations/v1/odoo/events"
 
         for rec in pending_records:
             rec._dispatch_single(endpoint, secret)

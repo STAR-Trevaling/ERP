@@ -10,7 +10,7 @@ if '"integrations",' not in content:
     content = content.replace('"core",', '"core",\n    "integrations",')
     odoo_cfg = """
 # Odoo 18 ERP Integration Settings
-ODOO_BASE_URL = os.getenv("ODOO_BASE_URL", "http://localhost:8069")
+ODOO_BASE_URL = os.getenv("ODOO_BASE_URL", "http://host.docker.internal:8069")
 ODOO_WEBHOOK_SECRET = os.getenv("ODOO_WEBHOOK_SECRET", "star_travels_super_secret_webhook_key_2026")
 ODOO_INBOUND_API_KEY = os.getenv("ODOO_INBOUND_API_KEY", "star_travels_inbound_api_token_2026")
 """
