@@ -152,8 +152,8 @@ def clean_mock_data():
 
     print("\n================= HIỆN TRẠNG SAU KHI DỌN DẸP =================")
     print(f"Tổng CRM Leads du lịch thực còn lại: {len(remaining_leads)}")
-    for l in remaining_leads:
-        print(f"  - Lead [{l['id']}]: {l['name']} | SĐT: {l['phone']} | Email: {l['email_from']}")
+    for lead_rec in remaining_leads:
+        print(f"  - Lead [{lead_rec['id']}]: {lead_rec['name']} | SĐT: {lead_rec['phone']} | Email: {lead_rec['email_from']}")
 
     print(f"\nTổng Contacts hoạt động (res.partner) còn lại: {len(remaining_partners)}")
     for p in remaining_partners:

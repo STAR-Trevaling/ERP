@@ -61,3 +61,15 @@ Thư mục này chứa các scripts tiện ích, tự động hóa cấu hình v
   python scripts/clean_odoo_mock_data.py
   ```
 
+---
+
+## 5. Kiểm tra Tiền Kiểm CI (Local Pre-Flight Runner)
+
+### `run_local_ci.py`
+* **Mục đích**: Thực thi nhanh toàn bộ các chặng kiểm tra chất lượng mã nguồn (Ruff linter, XML template parse, JSON contracts validation, Pytest E2E suite) trên môi trường local trước khi commit và push lên GitHub.
+* **Cách chạy**:
+  ```bash
+  python scripts/run_local_ci.py
+  ```
+
+
