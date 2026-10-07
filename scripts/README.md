@@ -49,3 +49,15 @@ Thư mục này chứa các scripts tiện ích, tự động hóa cấu hình v
 
 ### `run_pytest_integrations.py`
 * **Mục đích**: Kích hoạt bộ kiểm thử `pytest` cho app `integrations` của Django platform.
+
+---
+
+## 4. Bảo trì & Thanh lọc Dữ liệu (Maintenance & Purging)
+
+### `clean_odoo_mock_data.py`
+* **Mục đích**: Rà soát và xóa sạch toàn bộ các Leads và Contacts demo bàn ghế, văn phòng của Odoo core (`crm_case_*`, `res_partner_*`) và các mock test tạm thời, bảo toàn nguyên vẹn tài khoản quản trị và dữ liệu du lịch thực.
+* **Cách chạy**:
+  ```bash
+  python scripts/clean_odoo_mock_data.py
+  ```
+
