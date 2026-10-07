@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
+from odoo.tests.common import TransactionCase
 
 
 class TestTravelCMS(TransactionCase):
@@ -18,8 +17,8 @@ class TestTravelCMS(TransactionCase):
     def test_destination_lifecycle_workflow(self):
         """Test Destination Draft -> In Review -> Approved -> Published state machine."""
         dest = self.destination_model.create({
-            'name': 'Da Nang City',
-            'slug': 'da-nang-city',
+            'name': 'Da Nang City Test',
+            'slug': 'test-da-nang-city',
             'latitude': 16.0544,
             'longitude': 108.2022,
         })
@@ -48,20 +47,20 @@ class TestTravelCMS(TransactionCase):
     def test_place_lifecycle_and_relationships(self):
         """Test Place creation linked to destination and category."""
         dest = self.destination_model.create({
-            'name': 'Ha Long Bay',
-            'slug': 'ha-long-bay',
+            'name': 'Ha Long Bay Test',
+            'slug': 'test-ha-long-bay',
             'latitude': 20.9101,
             'longitude': 107.1839,
         })
         place = self.place_model.create({
-            'name': 'Ti Top Island',
-            'slug': 'ti-top-island',
+            'name': 'Ti Top Island Test',
+            'slug': 'test-ti-top-island',
             'destination_id': dest.id,
             'category_id': self.category.id,
             'latitude': 20.8587,
             'longitude': 107.0805,
         })
-        self.assertEqual(place.destination_id.name, 'Ha Long Bay')
+        self.assertEqual(place.destination_id.name, 'Ha Long Bay Test')
         self.assertEqual(place.state, 'draft')
 
         # Test place count on destination
@@ -77,14 +76,14 @@ class TestTravelCMS(TransactionCase):
     def test_article_lifecycle(self):
         """Test Article authoring and publishing."""
         dest = self.destination_model.create({
-            'name': 'Ninh Binh',
-            'slug': 'ninh-binh',
+            'name': 'Ninh Binh Test',
+            'slug': 'test-ninh-binh',
             'latitude': 20.2506,
             'longitude': 105.9745,
         })
         article = self.article_model.create({
-            'title': 'Trang An Boat Tour Guide',
-            'slug': 'trang-an-boat-tour-guide',
+            'title': 'Trang An Boat Tour Guide Test',
+            'slug': 'test-trang-an-guide',
             'destination_id': dest.id,
             'body': '<p>Everything you need to know about Trang An.</p>',
         })

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Master Categories from STAR Travels Platform -->
+        <record id="category_van_hoa_di_san" model="travel.category">
+            <field name="name">Văn hóa &amp; Di sản</field>
+            <field name="slug">van-hoa-di-san</field>
+            <field name="sequence">10</field>
+            <field name="icon">landmark</field>
+            <field name="description">Khám phá các di sản văn hóa, phố cổ, di tích lịch sử và danh lam thắng cảnh ngàn năm.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_du_thuyen" model="travel.category">
+            <field name="name">Du thuyền &amp; Nghỉ dưỡng</field>
+            <field name="slug">du-thuyen</field>
+            <field name="sequence">20</field>
+            <field name="icon">ship</field>
+            <field name="description">Hải trình nghỉ dưỡng đẳng cấp trên du thuyền và resort cao cấp ven biển.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_the_thao_nuoc" model="travel.category">
+            <field name="name">Thể thao nước</field>
+            <field name="slug">the-thao-nuoc</field>
+            <field name="sequence">30</field>
+            <field name="icon">waves</field>
+            <field name="description">Hoạt động lướt thuyền buồm, môtô nước và các môn thể thao mạo hiểm dưới nước.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_trekking_leo_nui" model="travel.category">
+            <field name="name">Trekking &amp; Leo núi</field>
+            <field name="slug">trekking-leo-nui</field>
+            <field name="sequence">40</field>
+            <field name="icon">mountain</field>
+            <field name="description">Chinh phục những cung đường mòn hiểm trở, đỉnh núi cao và rừng nguyên sinh kỳ vĩ.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_cam_trai_da_ngoai" model="travel.category">
+            <field name="name">Cắm trại dã ngoại</field>
+            <field name="slug">cam-trai-da-ngoai</field>
+            <field name="sequence">50</field>
+            <field name="icon">tent</field>
+            <field name="description">Cắm trại qua đêm, săn mây bồng bềnh và tận hưởng không gian thiên nhiên thanh bình.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_lan_bien_san_ho" model="travel.category">
+            <field name="name">Lặn biển san hô</field>
+            <field name="slug">lan-bien-san-ho</field>
+            <field name="sequence">60</field>
+            <field name="icon">compass</field>
+            <field name="description">Thám hiểm hệ sinh thái rạn san hô rực rỡ và thế giới đại dương phong phú.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_kayak_the_thao_nuoc" model="travel.category">
+            <field name="name">Kayak &amp; Chèo SUP</field>
+            <field name="slug">kayak-the-thao-nuoc</field>
+            <field name="sequence">70</field>
+            <field name="icon">navigation</field>
+            <field name="description">Chèo thuyền kayak luồn lách qua các hang động đá vôi và vịnh biển xanh ngắt.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="category_am_thuc_dia_phuong" model="travel.category">
+            <field name="name">Ẩm thực địa phương</field>
+            <field name="slug">am-thuc-dia-phuong</field>
+            <field name="sequence">80</field>
+            <field name="icon">utensils</field>
+            <field name="description">Thưởng thức tinh hoa ẩm thực ba miền và phong vị ẩm thực đường phố đặc sắc.</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

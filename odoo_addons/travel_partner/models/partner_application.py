@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
-import uuid
 import re
+import uuid
+
+from odoo import _, fields, models
+from odoo.exceptions import UserError
 
 
 class TravelPartnerApplication(models.Model):
     _name = 'travel.partner.application'
     _description = 'Partner Onboarding Application'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']  # noqa: RUF012
     _order = 'create_date desc'
 
     business_name = fields.Char(string="Business / Organization Name", required=True, tracking=True)
@@ -38,15 +38,16 @@ class TravelPartnerApplication(models.Model):
             if rec.state != 'submitted':
                 raise UserError(_("Only submitted applications can be put under review."))
             rec.write({'state': 'under_review'})
+        return True
 
     def action_approve(self):
         for rec in self:
             if rec.state != 'under_review':
                 raise UserError(_("Application must be in review before approval."))
-            
+
             # Generate organization slug
             slug = re.sub(r'[^a-zA-Z0-9]+', '-', rec.business_name.lower()).strip('-')
-            
+
             # Create or update Partner organization
             partner_vals = {
                 'name': rec.business_name,
@@ -67,6 +68,7 @@ class TravelPartnerApplication(models.Model):
             })
 
             rec._emit_outbox_event('partner.approved')
+        return True
 
     def action_reject(self):
         for rec in self:
@@ -80,10 +82,12 @@ class TravelPartnerApplication(models.Model):
                 'reviewed_at': fields.Datetime.now(),
             })
             rec._emit_outbox_event('partner.rejected')
+        return True
 
     def action_reset_submitted(self):
         for rec in self:
             rec.write({'state': 'submitted'})
+        return True
 
     def _emit_outbox_event(self, event_type):
         """Helper to create transactional outbox event if travel_integration is available."""

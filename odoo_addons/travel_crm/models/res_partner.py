@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
 import re
+
+from odoo import api, fields, models
 
 
 class ResPartner(models.Model):
@@ -99,11 +100,13 @@ class ResPartner(models.Model):
             return partner
 
         # Rule 4: Create new partner
+        valid_providers = dict(self._fields['identity_provider'].selection)
+        safe_provider = provider if provider in valid_providers else 'website'
         vals = {
             'name': name or (norm_phone or norm_email or "Anonymous Traveler"),
             'phone': norm_phone or (phone or False),
             'email': norm_email or (email or False),
             'public_customer_id': str(public_id) if public_id else False,
-            'identity_provider': provider,
+            'identity_provider': safe_provider,
         }
         return self.create(vals)

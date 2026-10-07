@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
-from datetime import timedelta
-import json
-import uuid
-import hmac
 import hashlib
-import urllib.request
-import urllib.error
+import hmac
+import json
 import logging
+import urllib.error
+import urllib.request
+import uuid
+from datetime import timedelta
+
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -72,9 +73,9 @@ class TravelIntegrationOutbox(models.Model):
         if not pending_records:
             return True
 
-        base_url = self.env['ir.config_parameter'].sudo().get_param('travel.public_platform_url', 'http://localhost:8000').rstrip('/')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('travel.public_platform_url', 'http://host.docker.internal:8000').rstrip('/')
         secret = self.env['ir.config_parameter'].sudo().get_param('travel.webhook_secret', 'star_travels_super_secret_webhook_key_2026')
-        endpoint = f"{base_url}/api/integrations/v1/odoo/events"
+        endpoint = f"{base_url}/api/v1/integrations/v1/odoo/events"
 
         for rec in pending_records:
             rec._dispatch_single(endpoint, secret)
@@ -122,9 +123,9 @@ class TravelIntegrationOutbox(models.Model):
         """Calculate exponential backoff or mark as permanently failed."""
         self.ensure_one()
         new_retry = self.retry_count + 1
-        _logger.warning("Failed delivery for Outbox Event %s (attempt %s/%s): %s", 
+        _logger.warning("Failed delivery for Outbox Event %s (attempt %s/%s): %s",
                        self.event_id, new_retry, self.max_retries, err_msg)
-        
+
         if new_retry >= self.max_retries:
             self.write({
                 'state': 'failed',

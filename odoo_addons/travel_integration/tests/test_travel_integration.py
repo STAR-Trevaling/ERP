@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-from odoo.tests.common import TransactionCase
-import json
-import uuid
-import hmac
 import hashlib
+import hmac
+import uuid
+
+from odoo.tests.common import TransactionCase
 
 
 class TestTravelIntegration(TransactionCase):
@@ -49,7 +48,7 @@ class TestTravelIntegration(TransactionCase):
         # First delivery
         res1 = self.inbound_model.process_inbound_envelope(envelope)
         self.assertTrue(res1['success'])
-        lead_id = res1['lead_id']
+        self.assertTrue(res1.get('lead_id'))
 
         leads_after_first = self.lead_model.search_count([('phone', '=', '0933221100')])
         self.assertEqual(leads_after_first, 1, "Exactly one lead created on first attempt")

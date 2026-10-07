@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from odoo import http, SUPERUSER_ID
-from odoo.http import request, Response
-import json
-import hmac
 import hashlib
+import hmac
+import json
 import logging
+
+from odoo import SUPERUSER_ID, http
+from odoo.http import Response, request
 
 _logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class TravelIntegrationController(http.Controller):
         }
         return self._json_response(problem, status=status)
 
-    @http.route('/api/v1/travel/health', type='http', auth='none', methods=['GET'], csrf=False)
+    @http.route('/api/v1/travel/health', type='http', auth='public', methods=['GET'], csrf=False, readonly=True)
     def health_check(self, **kwargs):
         """Public healthcheck probe for integration endpoints."""
         return self._json_response({
@@ -70,7 +71,7 @@ class TravelIntegrationController(http.Controller):
             'version': '18.0.1.0.0',
         })
 
-    @http.route('/api/v1/travel/inquiry', type='http', auth='none', methods=['POST'], csrf=False)
+    @http.route('/api/v1/travel/inquiry', type='http', auth='public', methods=['POST'], csrf=False, readonly=False)
     def handle_inquiry(self, **kwargs):
         """Inbound endpoint for public website / social channel inquiries."""
         if not self._verify_auth():
@@ -111,7 +112,7 @@ class TravelIntegrationController(http.Controller):
         envelope = {
             'event_id': idempotency_key,
             'event_type': payload.get('event_type') or 'inquiry.created',
-            'source': payload.get('source') or 'public-platform',
+            'source': payload.get('source') or 'website',
             'event_version': payload.get('event_version') or 1,
             'data': payload.get('data') or payload,
         }
@@ -129,7 +130,7 @@ class TravelIntegrationController(http.Controller):
                 error_code="PROCESSING_ERROR"
             )
 
-    @http.route('/api/v1/travel/partner-application', type='http', auth='none', methods=['POST'], csrf=False)
+    @http.route('/api/v1/travel/partner-application', type='http', auth='public', methods=['POST'], csrf=False, readonly=False)
     def handle_partner_application(self, **kwargs):
         """Inbound endpoint for partner onboarding applications from public platform."""
         if not self._verify_auth():

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from odoo.tests.common import TransactionCase
 
 
@@ -9,8 +8,8 @@ class TestTravelCRM(TransactionCase):
         self.partner_model = self.env['res.partner']
         self.lead_model = self.env['crm.lead']
         self.destination = self.env['travel.destination'].create({
-            'name': 'Da Lat',
-            'slug': 'da-lat',
+            'name': 'Da Lat Test',
+            'slug': 'test-da-lat',
             'latitude': 11.9404,
             'longitude': 108.4583,
         })
@@ -61,7 +60,7 @@ class TestTravelCRM(TransactionCase):
                 'public_customer_id': 'f7d2f9a2-4a4b-4f9e-8c31-9f2257d90391'
             },
             'interest': {
-                'destination_slug': 'da-lat',
+                'destination_slug': 'test-da-lat',
                 'travel_date': '2026-11-20',
                 'traveler_count': 4,
             },

@@ -22,6 +22,7 @@ Star Travels CMS Content Authoring Module
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/travel_demo_vietnam.xml',
         'views/travel_destination_views.xml',
         'views/travel_place_views.xml',
         'views/travel_article_views.xml',

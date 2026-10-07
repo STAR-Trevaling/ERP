@@ -1,0 +1,186 @@
+name: CI Quality Gate & Test Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -------------------------------------------------------------
+  # Job 1: Linting, Formatting & Static Syntax Analysis
+  # -------------------------------------------------------------
+  lint-and-static-analysis:
+    name: Linting & Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Linting & Code Quality Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Run Ruff Linter
+        run: |
+          ruff check .
+
+      - name: Validate XML Manifests & View Architecture
+        run: |
+          python -c "
+          import os, sys, xml.etree.ElementTree as ET
+          failed = False
+          count = 0
+          for root, _, files in os.walk('odoo_addons'):
+              for f in files:
+                  if f.endswith('.xml'):
+                      p = os.path.join(root, f)
+                      try:
+                          ET.parse(p)
+                          count += 1
+                      except Exception as e:
+                          print(f'::error file={p}::XML Parse Error: {e}', file=sys.stderr)
+                          failed = True
+          if failed:
+              sys.exit(1)
+          print(f'Successfully parsed and validated {count} XML view/data templates!')
+          "
+
+      - name: Validate JSON Data Contracts
+        run: |
+          python -c "
+          import os, sys, json
+          count = 0
+          for root, _, files in os.walk('contracts'):
+              for f in files:
+                  if f.endswith('.json'):
+                      p = os.path.join(root, f)
+                      with open(p, 'r', encoding='utf-8') as fh:
+                          json.load(fh)
+                          count += 1
+          print(f'Successfully validated {count} JSON contract schemas!')
+          "
+
+  # -------------------------------------------------------------
+  # Job 2: Odoo 18 In-Container Native Tests (Hermetic DB Rollback)
+  # -------------------------------------------------------------
+  odoo-native-tests:
+    name: Odoo 18 Native Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Start PostgreSQL Service Container
+        run: |
+          docker compose up -d db
+          until docker compose exec -T db pg_isready -U odoo; do
+            echo "Waiting for postgres to become ready..."
+            sleep 2
+          done
+
+      - name: Run Odoo Native Tests (HttpCase & TransactionCase)
+        run: |
+          docker compose run --rm odoo odoo -d odoo_ci_test \
+            -i base,mail,contacts,crm,travel_core,travel_cms,travel_crm,travel_partner,travel_integration \
+            --without-demo=all \
+            --test-enable \
+            --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration \
+            --stop-after-init --log-level=test
+
+      - name: Teardown Services
+        if: always()
+        run: |
+          docker compose down -v
+
+  # -------------------------------------------------------------
+  # Job 3: Live End-to-End Integration Suite (Pytest HTTP & XML-RPC)
+  # -------------------------------------------------------------
+  e2e-integration-tests:
+    name: Live E2E API & Workflow Suite
+    needs: [lint-and-static-analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install E2E Test Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests
+
+      - name: Start Postgres & Initialize Odoo Database
+        run: |
+          docker compose up -d db
+          until docker compose exec -T db pg_isready -U odoo; do
+            echo "Waiting for postgres to become ready..."
+            sleep 2
+          done
+
+          # Initialize database schema and modules
+          docker compose run --rm odoo odoo -d odoo_travel \
+            -i base,mail,contacts,crm,travel_core,travel_cms,travel_crm,travel_partner,travel_integration \
+            --without-demo=all \
+            --stop-after-init
+
+      - name: Start Odoo Web Server Daemon
+        run: |
+          docker compose up -d odoo
+          
+          # Health check probe loop (wait up to 60 seconds)
+          for i in {1..30}; do
+            if curl -sf http://localhost:8069/api/v1/travel/health | grep -q "ok"; then
+              echo "Odoo 18 web server is online and healthy!"
+              break
+            fi
+            echo "Waiting for Odoo HTTP server to bind port 8069... ($i/30)"
+            sleep 2
+          done
+
+      - name: Execute Pytest Live E2E Test Suite
+        env:
+          ODOO_URL: http://localhost:8069
+          ODOO_DB: odoo_travel
+          ODOO_USER: admin
+          ODOO_PASSWORD: admin
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Teardown Services
+        if: always()
+        run: |
+          docker compose down -v
+
+  # -------------------------------------------------------------
+  # Job 4: Required Status Gate for Protected Branches
+  # -------------------------------------------------------------
+  ci-status-check:
+    name: All CI Quality Gates Passed
+    needs: [lint-and-static-analysis, odoo-native-tests, e2e-integration-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Verify All Preceding Gates Succeeded
+        run: |
+          if [[ "${{ needs.lint-and-static-analysis.result }}" != "success" || \
+                "${{ needs.odoo-native-tests.result }}" != "success" || \
+                "${{ needs.e2e-integration-tests.result }}" != "success" ]]; then
+            echo "::error::One or more CI quality jobs failed! Inspect individual jobs above."
+            exit 1
+          fi
+          echo "All CI quality checks and test suites passed successfully! Ready to merge."

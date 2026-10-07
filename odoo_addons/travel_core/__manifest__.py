@@ -21,6 +21,7 @@ Star Travels Core Foundation Module
     'data': [
         'security/travel_security.xml',
         'security/ir.model.access.csv',
+        'data/travel_category_data.xml',
         'views/travel_menus.xml',
         'views/travel_category_views.xml',
         'views/res_config_settings_views.xml',
