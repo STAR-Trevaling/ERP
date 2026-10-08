@@ -627,4 +627,147 @@ class StarTravelsPaymentWebhookController(http.Controller):
                 error_code="PROCESSING_ERROR",
             )
 
+    @http.route(
+        "/api/v1/travel/payment-pending",
+        type="http",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        readonly=False,
+    )
+    def handle_payment_pending(self, **kwargs):
+        """
+        Inbound webhook receiver when a customer creates a VietQR transfer payment on Django backend.
+        Registers the pending transfer in star.travels.payment.pending queue so accountants can
+        verify bank statements and manually confirm or reject.
+        """
+        if not self._verify_auth():
+            _logger.warning("Unauthorized access attempt to /api/v1/travel/payment-pending")
+            return self._problem_response(
+                title="Unauthorized",
+                detail="Missing or invalid authentication token / HMAC signature.",
+                status=401,
+                error_code="UNAUTHORIZED",
+            )
+
+        try:
+            raw_data = request.httprequest.get_data(as_text=True)
+            payload = json.loads(raw_data) if raw_data else {}
+        except json.JSONDecodeError:
+            return self._problem_response(
+                title="Invalid JSON",
+                detail="Request body must be valid JSON.",
+                status=400,
+                error_code="BAD_REQUEST",
+            )
+
+        idempotency_key = self._extract_idempotency_key(payload)
+        if not idempotency_key:
+            return self._problem_response(
+                title="Missing Idempotency Key",
+                detail="Header 'Idempotency-Key' or payload 'event_id' is required.",
+                status=400,
+                error_code="MISSING_IDEMPOTENCY_KEY",
+            )
+
+        env = request.env(user=SUPERUSER_ID)
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+
+        payment_id = data.get("payment_id") or data.get("id") or payload.get("payment_id")
+        booking_code = data.get("booking_code") or data.get("code") or f"ST-{idempotency_key[:8]}"
+        amount = float(data.get("amount") or payload.get("amount") or 0.0)
+        bank_transfer_content = data.get("bank_transfer_content") or data.get("transfer_content") or booking_code
+        customer_name = data.get("customer_name") or (data.get("customer") and data["customer"].get("name")) or "Khách hàng VietQR"
+        customer_email = data.get("customer_email") or (data.get("customer") and data["customer"].get("email"))
+        customer_phone = data.get("customer_phone") or (data.get("customer") and data["customer"].get("phone"))
+        booking_id = data.get("booking_id") or payload.get("booking_id")
+        salesperson_email = data.get("salesperson_email")
+
+        if not payment_id:
+            return self._problem_response(
+                title="Missing Payment ID",
+                detail="Field 'payment_id' is required.",
+                status=400,
+                error_code="MISSING_PAYMENT_ID",
+            )
+
+        # Check existing pending record (Idempotency)
+        existing_pending = env["star.travels.payment.pending"].search([
+            ("payment_id", "=", str(payment_id)),
+        ], limit=1)
+
+        if existing_pending:
+            _logger.info("Idempotent replay detected for VietQR payment %s", payment_id)
+            return self._json_response({
+                "success": True,
+                "pending_id": existing_pending.id,
+                "booking_code": existing_pending.booking_code,
+                "state": existing_pending.state,
+                "message": "Payment pending record already exists.",
+            }, status=200)
+
+        try:
+            with env.cr.savepoint():
+                # Find salesperson user if email provided
+                sales_user = False
+                if salesperson_email:
+                    sales_user = env["res.users"].search([("email", "=ilike", salesperson_email.strip())], limit=1)
+
+                pending_vals = {
+                    "payment_id": str(payment_id),
+                    "booking_code": booking_code,
+                    "booking_id": str(booking_id) if booking_id else False,
+                    "amount": amount,
+                    "bank_transfer_content": bank_transfer_content,
+                    "customer_name": customer_name,
+                    "customer_email": customer_email,
+                    "customer_phone": customer_phone,
+                    "user_id": sales_user.id if sales_user else False,
+                    "state": "pending",
+                    "raw_payload": raw_data,
+                }
+                pending = env["star.travels.payment.pending"].create(pending_vals)
+
+                # Write Audit Trail
+                env["star.travels.payment.audit.log"]._write_audit_log({
+                    "pending_payment_id": pending.id,
+                    "booking_code": booking_code,
+                    "action": "pending_received",
+                    "source": "manual_odoo_ui",
+                    "performed_by": False,
+                    "old_state": False,
+                    "new_state": "pending",
+                    "amount_declared": amount,
+                    "amount_confirmed": 0.0,
+                    "evidence_note": f"Tiếp nhận giao dịch VietQR chờ chuyển khoản. Cú pháp: '{bank_transfer_content}'",
+                })
+
+                # Write Idempotency Log
+                result_data = {
+                    "success": True,
+                    "pending_id": pending.id,
+                    "booking_code": booking_code,
+                    "message": "VietQR payment registered in pending queue.",
+                }
+                env["star.travels.webhook.log"].create({
+                    "event_id": str(idempotency_key),
+                    "event_type": "payment.pending",
+                    "payload": raw_data,
+                    "state": "success",
+                    "result_summary": json.dumps(result_data),
+                    "res_model": "star.travels.payment.pending",
+                    "res_id": pending.id,
+                })
+
+                _logger.info("Registered pending VietQR payment #%d (Booking: %s, Amount: %s)", pending.id, booking_code, amount)
+                return self._json_response(result_data, status=200)
+
+        except Exception as e:
+            _logger.exception("Error processing payment-pending webhook for event %s: %s", idempotency_key, str(e))
+            return self._problem_response(
+                title="Payment Pending Registration Error",
+                detail=str(e),
+                status=500,
+                error_code="PROCESSING_ERROR",
+            )
 
