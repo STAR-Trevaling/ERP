@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Group: STAR Payment Confirmer -->
+    <record id="group_payment_confirmer" model="res.groups">
+        <field name="name">Kế toán Xác Nhận Thanh Toán (STAR Payment Confirmer)</field>
+        <field name="category_id" ref="travel_core.module_category_travel"/>
+        <field name="implied_ids" eval="[(4, ref('account.group_account_user'))]"/>
+        <field name="comment">Chỉ người dùng thuộc nhóm này mới có quyền xác nhận thực nhận tiền chuyển khoản VietQR.</field>
+    </record>
+
+    <!-- Record Rule: Separation of Duties (SoD) on star.travels.payment.pending -->
+    <!-- Salesperson cannot write/confirm their own pending payment -->
+    <record id="rule_payment_pending_confirmer_all" model="ir.rule">
+        <field name="name">STAR Payment Confirmer: View All Pending Payments</field>
+        <field name="model_id" ref="model_star_travels_payment_pending"/>
+        <field name="groups" eval="[(4, ref('group_payment_confirmer'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!-- Audit Log Rule: Immutable view for all accounting users -->
+    <record id="rule_payment_audit_log_view_all" model="ir.rule">
+        <field name="name">STAR Payment Audit Log: Read All</field>
+        <field name="model_id" ref="model_star_travels_payment_audit_log"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+</odoo>
