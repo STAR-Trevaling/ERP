@@ -4,11 +4,12 @@ Star Travels Integration Architecture Verification Script
 Validates JSON schemas, HMAC-SHA256 signature generation/verification,
 traveler deduplication algorithms, and canonical contract compliance.
 """
-import hmac
 import hashlib
+import hmac
 import json
 import re
 import uuid
+
 
 def normalize_phone(phone):
     if not phone:
@@ -37,7 +38,7 @@ def test_traveler_deduplication():
     assert normalize_phone("84905123456") == "0905123456", "Phone failed 84 prefix"
     assert normalize_phone("0905-123-456") == "0905123456", "Phone failed hyphen removal"
     assert normalize_phone("905123456") == "0905123456", "Phone failed 9-digit auto-zero"
-    
+
     # Test email normalization
     assert normalize_email("  TRAVELER@GMAIL.COM  ") == "traveler@gmail.com", "Email normalization failed"
     print("   [PASS] Phone and Email deduplication algorithms pass 100% of cases.")
@@ -52,11 +53,11 @@ def test_hmac_signature_verification():
     }
     raw_bytes = json.dumps(payload, sort_keys=True).encode('utf-8')
     sig = compute_hmac(secret, raw_bytes)
-    
+
     # Verify valid signature matches
     computed = compute_hmac(secret, raw_bytes)
     assert hmac.compare_digest(sig, computed), "Signature verification failed"
-    
+
     # Verify tampered payload fails
     tampered_bytes = raw_bytes + b" "
     tampered_sig = compute_hmac(secret, tampered_bytes)
@@ -84,11 +85,11 @@ def test_canonical_event_envelope():
             }
         }
     }
-    
+
     # Check mandatory fields
     for field in ["event_id", "event_type", "event_version", "source", "occurred_at", "data"]:
         assert field in envelope, f"Missing required envelope field: {field}"
-    
+
     print("   [PASS] Canonical Event Envelope contract verified.")
 
 if __name__ == '__main__':

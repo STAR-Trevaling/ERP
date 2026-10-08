@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Ruff Linter
         run: |
-          python -m ruff check .
+          python -m ruff check . --config pyproject.toml
 
       - name: Validate XML Manifests & View Architecture
         run: |
@@ -91,12 +91,20 @@ jobs:
 
       - name: Run Odoo Native Tests (HttpCase & TransactionCase)
         run: |
+          set -o pipefail
           docker compose run --rm odoo odoo -d odoo_ci_test --db-filter=.* \
             -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --test-enable \
             --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration,/star_travels_payment_sync \
-            --stop-after-init --log-level=test
+            --stop-after-init --log-level=test 2>&1 | tee odoo_tests.log
+
+      - name: Print Odoo Test Failure Logs
+        if: failure()
+        run: |
+          echo "==================== ODOO TEST LOG SUMMARY ===================="
+          tail -n 120 odoo_tests.log || true
+          echo "================================================================"
 
       - name: Teardown Services
         if: always()

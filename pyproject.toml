@@ -20,7 +20,10 @@ exclude = [
     ".pytest_cache",
     ".ruff_cache",
     "scratch",
+    "scratch/**",
     "odoo_addons/muk_*",
+    "odoo_addons/muk_*/**",
+    "**/muk_*/**",
 ]
 
 [tool.ruff.lint]
