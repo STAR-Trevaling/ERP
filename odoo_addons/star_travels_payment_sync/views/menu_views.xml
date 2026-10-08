@@ -14,30 +14,51 @@
         </field>
     </record>
 
-    <!-- Reporting & Reconciliation Root Menu under Accounting > Reporting -->
+    <!-- Operational Menu under Accounting > Customers (Khách hàng) or Accounting > Accounting -->
+    <menuitem id="menu_star_travels_vietqr_operational"
+              name="Xác Nhận Chuyển Khoản VietQR"
+              parent="account.menu_finance_entries"
+              action="action_star_travels_payment_pending"
+              sequence="15"/>
+
+    <!-- Reporting & Audit Root Menu under Accounting > Reporting -->
     <menuitem id="menu_star_travels_payment_root"
               name="Đối Soát Thanh Toán (STAR)"
               parent="account.menu_finance_reports"
               sequence="35"/>
 
-    <!-- Submenu 1: Run Reconciliation Wizard -->
+    <!-- Submenu 1: VietQR Pending Queue -->
+    <menuitem id="menu_star_travels_payment_pending_report"
+              name="Hàng Đợi VietQR Chờ Duyệt"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_payment_pending"
+              sequence="5"/>
+
+    <!-- Submenu 2: Audit Trail Log -->
+    <menuitem id="menu_star_travels_payment_audit_log"
+              name="Nhật Ký Kiểm Toán (Audit Trail)"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_payment_audit_log"
+              sequence="15"/>
+
+    <!-- Submenu 3: Run Reconciliation Wizard -->
     <menuitem id="menu_star_travels_reconciliation_wizard"
               name="Đối Soát Bảng Kê (Wizard)"
               parent="menu_star_travels_payment_root"
               action="action_star_travels_reconciliation_wizard"
-              sequence="10"/>
+              sequence="25"/>
 
-    <!-- Submenu 2: Gateway Payments List -->
+    <!-- Submenu 4: Gateway Payments List -->
     <menuitem id="menu_star_travels_gateway_payments"
-              name="Giao Dịch Cổng (VNPay/MoMo/ZaloPay)"
+              name="Giao Dịch Cổng (VNPay/MoMo/VietQR)"
               parent="menu_star_travels_payment_root"
               action="action_star_travels_gateway_payments"
-              sequence="20"/>
+              sequence="35"/>
 
-    <!-- Submenu 3: Webhook Sync Logs -->
+    <!-- Submenu 5: Webhook Sync Logs -->
     <menuitem id="menu_star_travels_webhook_logs"
               name="Nhật Ký Webhook Đồng Bộ"
               parent="menu_star_travels_payment_root"
               action="action_star_travels_webhook_log"
-              sequence="30"/>
+              sequence="45"/>
 </odoo>
