@@ -5,6 +5,7 @@ import hmac
 import json
 import uuid
 
+from odoo.exceptions import UserError
 from odoo.tests.common import HttpCase, tagged
 
 
@@ -331,3 +332,94 @@ VNP-UNKNOWN-999,500000,TCB
         # Verify pay1 is now matched, pay2 is unmatched
         self.assertEqual(pay1.x_reconciliation_state, "matched")
         self.assertEqual(pay2.x_reconciliation_state, "unmatched")
+
+    def test_vietqr_pending_webhook_registration(self):
+        """POST /api/v1/travel/payment-pending creates star.travels.payment.pending and audit log."""
+        event_id = str(uuid.uuid4())
+        payment_id = f"tx_qr_{uuid.uuid4().hex[:8]}"
+        booking_code = f"ST-QR-{uuid.uuid4().hex[:6].upper()}"
+
+        payload = {
+            "event_id": event_id,
+            "payment_id": payment_id,
+            "booking_code": booking_code,
+            "amount": 1200000.0,
+            "bank_transfer_content": f"STAR {booking_code}",
+            "customer_name": "Le Van VietQR",
+            "customer_email": "vietqr@test.vn",
+            "customer_phone": "0911223344",
+        }
+        body_bytes = json.dumps(payload).encode("utf-8")
+        headers = {
+            "Content-Type": "application/json",
+            "X-Signature-SHA256": self._sign_payload(body_bytes),
+            "Idempotency-Key": event_id,
+        }
+
+        resp = self.url_open("/api/v1/travel/payment-pending", data=body_bytes, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+        res_data = resp.json()
+        self.assertTrue(res_data.get("success"))
+        pending_id = res_data.get("pending_id")
+        self.assertTrue(pending_id)
+
+        # Verify Pending record
+        pending = self.env["star.travels.payment.pending"].sudo().browse(pending_id)
+        self.assertEqual(pending.state, "pending")
+        self.assertEqual(pending.amount, 1200000.0)
+        self.assertEqual(pending.bank_transfer_content, f"STAR {booking_code}")
+
+        # Verify initial audit trail
+        audit_logs = self.env["star.travels.payment.audit.log"].sudo().search([
+            ("booking_code", "=", booking_code),
+            ("action", "=", "pending_received"),
+        ])
+        self.assertTrue(audit_logs)
+        self.assertEqual(audit_logs[0].amount_declared, 1200000.0)
+
+    def test_audit_log_hard_immutability(self):
+        """Audit log write() and unlink() must raise UserError."""
+        audit_log = self.env["star.travels.payment.audit.log"].sudo()._write_audit_log({
+            "booking_code": "ST-AUDIT-TEST",
+            "action": "pending_received",
+            "source": "manual_odoo_ui",
+            "performed_by": self.env.user.id,
+            "amount_declared": 100000.0,
+            "amount_confirmed": 0.0,
+            "evidence_note": "Test immutability",
+        })
+        self.assertTrue(audit_log.id)
+
+        # Attempt write
+        with self.assertRaises(UserError):
+            audit_log.write({"evidence_note": "Tampered note"})
+
+        # Attempt unlink
+        with self.assertRaises(UserError):
+            audit_log.unlink()
+
+    def test_vietqr_discrepancy_requires_evidence_note(self):
+        """Wizard must block confirmation if declared != confirmed amount without evidence note."""
+        pending = self.env["star.travels.payment.pending"].sudo().create({
+            "payment_id": f"tx_diff_{uuid.uuid4().hex[:6]}",
+            "booking_code": "ST-DIFF-01",
+            "amount": 2000000.0,
+            "bank_transfer_content": "ST DIFF 01",
+            "customer_name": "Test Discrepancy",
+            "state": "pending",
+        })
+
+        wizard = self.env["star.travels.vietqr.confirm.wizard"].sudo().create({
+            "pending_id": pending.id,
+            "amount_confirmed": 1900000.0,  # 100k difference
+            "evidence_note": "",  # Empty note -> MUST FAIL
+        })
+
+        with self.assertRaises(UserError):
+            wizard.action_confirm()
+
+        # Adding evidence note allows confirmation to proceed
+        wizard.evidence_note = "Khách trừ 100k phí chuyển khoản liên ngân hàng"
+        wizard.action_confirm()
+        self.assertEqual(pending.state, "confirmed")
+        self.assertEqual(pending.amount_confirmed, 1900000.0)

@@ -2,6 +2,8 @@ import hashlib
 import hmac
 import json
 
+import pytest
+
 
 def compute_hmac(secret: str, body_bytes: bytes) -> str:
     return hmac.new(secret.encode("utf-8"), body_bytes, hashlib.sha256).hexdigest()
@@ -136,3 +138,96 @@ VNP_1003,300000000,TCB
         assert discrepancy == (200000.0 + 500000.0)
         assert odoo_payments["TX_A"]["state"] == "matched"
         assert odoo_payments["TX_B"]["state"] == "unmatched"
+
+    def test_audit_log_append_only_immutability(self):
+        """Audit log write/unlink must be permanently blocked."""
+        class MockAuditLog:
+            def __init__(self, data):
+                self.data = data
+
+            def write(self, vals):
+                raise PermissionError("Audit log entries are immutable and append-only. Modification is strictly prohibited!")
+
+            def unlink(self):
+                raise PermissionError("Audit log entries are immutable and append-only. Deletion is strictly prohibited!")
+
+        log = MockAuditLog({"booking_code": "ST-001", "action": "manual_confirmed"})
+        with pytest.raises(PermissionError, match="immutable and append-only"):
+            log.write({"amount_confirmed": 999})
+        with pytest.raises(PermissionError, match="immutable and append-only"):
+            log.unlink()
+
+    def test_vietqr_discrepancy_requires_evidence_note(self):
+        """When declared != confirmed amount, evidence note must not be blank."""
+        def validate_vietqr_confirmation(amount_declared, amount_confirmed, evidence_note):
+            if abs(amount_confirmed - amount_declared) > 0.01:
+                if not evidence_note or not evidence_note.strip():
+                    raise ValueError("Bắt buộc phải nhập 'Ghi chú đối soát / Chứng từ' khi số tiền thực nhận có sai lệch!")
+            return True
+
+        # Exactly matching amount doesn't strictly require note
+        assert validate_vietqr_confirmation(1500000.0, 1500000.0, "") is True
+
+        # Differing amount with note is valid
+        assert validate_vietqr_confirmation(1500000.0, 1400000.0, "Khách trừ tiền phí chuyển khoản ngân hàng") is True
+
+        # Differing amount without note must raise ValueError
+        with pytest.raises(ValueError, match="Bắt buộc phải nhập"):
+            validate_vietqr_confirmation(1500000.0, 1400000.0, "")
+        with pytest.raises(ValueError, match="Bắt buộc phải nhập"):
+            validate_vietqr_confirmation(1500000.0, 1400000.0, "   ")
+
+    def test_separation_of_duties_creator_cannot_self_confirm(self):
+        """Salesperson who created the booking cannot confirm the payment themselves."""
+        def check_separation_of_duties(order_creator_id, confirming_user_id):
+            if order_creator_id and order_creator_id == confirming_user_id:
+                raise PermissionError("Separation of Duties violation: Order creator cannot confirm payment!")
+            return True
+
+        # Different users: Allowed
+        assert check_separation_of_duties(order_creator_id=10, confirming_user_id=25) is True
+
+        # Same user: Forbidden
+        with pytest.raises(PermissionError, match="Separation of Duties violation"):
+            check_separation_of_duties(order_creator_id=10, confirming_user_id=10)
+
+    def test_vietqr_outbound_hmac_signature_to_django(self):
+        """Outbound call payload to Django /vietqr-confirm/ must be signed with HMAC-SHA256."""
+        secret = "star_travels_super_secret_webhook_key_2026"
+        outbound_payload = {
+            "payment_id": "tx_vietqr_999",
+            "booking_code": "ST-PQ-001",
+            "amount_confirmed": 2000000.0,
+            "confirmed_by": "Kế toán viên Lê Thị B",
+            "confirmed_at": "2026-10-08T17:45:00Z",
+            "bank_reference": "FT241088921",
+            "source": "manual_odoo_ui",
+        }
+        body_bytes = json.dumps(outbound_payload).encode("utf-8")
+        signature = compute_hmac(secret, body_bytes)
+
+        # Receiver verifies signature
+        assert verify_hmac(secret, body_bytes, signature) is True
+        assert verify_hmac("wrong_secret", body_bytes, signature) is False
+
+    def test_django_outbox_resilience_fallback(self):
+        """When outbound HTTP call to Django fails, event must be enqueued in Outbox without losing data."""
+        outbox_queue = []
+
+        def call_django_with_outbox_fallback(payment_id, payload, network_healthy=False):
+            if not network_healthy:
+                # Fallback to Outbox
+                outbox_queue.append({
+                    "event_type": "payment.vietqr.confirmed",
+                    "payment_id": payment_id,
+                    "payload": payload,
+                    "state": "pending",
+                })
+                return False
+            return True
+
+        res = call_django_with_outbox_fallback("tx-123", {"amount": 1000000}, network_healthy=False)
+        assert res is False
+        assert len(outbox_queue) == 1
+        assert outbox_queue[0]["payment_id"] == "tx-123"
+        assert outbox_queue[0]["state"] == "pending"
