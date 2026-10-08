@@ -1,104 +1,176 @@
 # Star Travels - Payment & Reconciliation Sync (`star_travels_payment_sync`)
 
-Module Odoo 18 tiếp nhận sự kiện thanh toán và hoàn tiền trực tuyến từ nền tảng công cộng (Django Backend) qua Webhook, tự động hạch toán kế toán và hỗ trợ đối soát sao kê bảng kê cổng thanh toán.
+Module Odoo 18 tích hợp toàn diện quy trình thanh toán du lịch đa kênh:
+1. **Thanh toán tự động qua Cổng (VNPay, MoMo, ZaloPay)**: Tiếp nhận webhook `booking.paid` và `booking.refunded`, tự động tạo Đơn hàng (Sale Order), Hóa đơn (Invoice), Bút toán thanh toán (Payment) và đối trừ công nợ tự động.
+2. **Xác nhận chuyển khoản VietQR thủ công (Manual Bank Transfer)**: Tiếp nhận đơn hàng chờ chuyển khoản (`payment-pending`), giao diện đối chiếu sao kê ngân hàng cho kế toán, wizard xác nhận tiền về kèm cơ chế gọi ngược cập nhật trạng thái sang Django backend.
+3. **Nhật ký kiểm toán bất biến (Append-Only Audit Trail)**: Theo dõi chặt chẽ mọi biến động thanh toán, ngăn chặn chỉnh sửa hoặc xóa dữ liệu, kiểm soát nghiêm ngặt nguyên tắc tách biệt vai trò (Separation of Duties).
+4. **Đối soát bảng kê (Statement Reconciliation Wizard)**: Nhập file sao kê CSV/Excel từ cổng thanh toán để tự động so khớp mã giao dịch và số tiền.
 
 ---
 
-## 1. Tính Năng Cốt Lõi
+## 1. Kiến Trúc & Luồng Dữ Liệu VietQR Thủ Công
 
-1. **Tiếp nhận Webhook Thanh toán (`POST /api/v1/travel/booking-paid`)**:
-   - Xác thực bảo mật đa tầng: Khóa API Bearer / Header `X-API-Key` và Chữ ký mật mã HMAC-SHA256 (`X-Signature-SHA256`).
-   - Phòng thủ tấn công phát lại (Replay Attack) và cơ chế Idempotent tuyệt đối qua model `star.travels.webhook.log`.
-   - Tự động tạo hoặc cập nhật đối tác khách hàng (`res.partner`).
-   - Tự động tạo và xác nhận Đơn bán hàng (`sale.order`) với mã booking tham chiếu.
-   - Tự động tạo và ghi sổ Hóa đơn khách hàng (`account.move` - `out_invoice`).
-   - Tự động đăng ký và ghi sổ Thanh toán (`account.payment`) trên Sổ nhật ký cổng tương ứng (VNPay, MoMo, ZaloPay).
-   - Tự động đối trừ công nợ (Auto-reconciliation) giữa hóa đơn và bút toán thanh toán.
-
-2. **Tiếp nhận Webhook Hoàn tiền (`POST /api/v1/travel/booking-refunded`)**:
-   - Tự động tìm hóa đơn gốc của booking tương ứng.
-   - Tự động tạo và ghi sổ Hóa đơn điều chỉnh giảm / Hoàn tiền (Credit Note - `out_refund`).
-   - Tự động tạo bút toán chi tiền hoàn trả (`account.payment` - `outbound`).
-   - Tự động đối trừ công nợ giữa Credit Note và bút toán chi tiền.
-
-3. **Sổ Nhật Ký Thanh Toán Riêng Biệt (Dedicated Gateway Journals)**:
-   - Sổ VNPay Gateway (`VNPAY`, loại `bank`)
-   - Sổ MoMo E-Wallet (`MOMO`, loại `bank`)
-   - Sổ ZaloPay E-Wallet (`ZALOP`, loại `bank`)
-
-4. **Đối Soát Bảng Kê Cổng Thanh Toán (Statement Reconciliation Wizard)**:
-   - Wizard `star.travels.reconciliation.wizard` cho phép kế toán tải lên file sao kê định dạng CSV/Excel do VNPay / MoMo cung cấp.
-   - Tự động trích xuất mã giao dịch cổng (`gateway_transaction_id`) và số tiền.
-   - Tự động đối chiếu với các bút toán `account.payment` trong hệ thống:
-     * Khớp hoàn toàn: Chuyển trạng thái `x_reconciliation_state` sang `matched`, ghi nhận ngày đối soát.
-     * Sai lệch hoặc thiếu: Đánh dấu `unmatched`, thống kê tổng số tiền sai lệch để kế toán xử lý.
-
-5. **Tự Động Giám Sát & Cảnh Báo (Scheduled Action)**:
-   - Cron job hàng ngày kiểm tra các giao dịch thanh toán cổng chưa đối soát quá 2 ngày và gửi cảnh báo đến kế toán viên.
+```
+┌────────────────────────────────────────────────────────┐
+│               Django Backend (PostgreSQL)              │
+│  - Khách tạo QR thanh toán -> state: 'pending'         │
+│  - Gửi webhook: POST /api/v1/travel/payment-pending    │
+└───────────────────────────┬────────────────────────────┘
+                            │ HMAC-SHA256 Signed Webhook
+┌───────────────────────────▼────────────────────────────┐
+│                  Odoo 18 Clean Monolith                │
+│  1. Lưu vào Hàng đợi: star.travels.payment.pending     │
+│  2. Ghi Audit Log: 'pending_received'                  │
+│                                                        │
+│  [Thao Tác Kế Toán]:                                   │
+│  - Kế toán kiểm tra sao kê tài khoản ngân hàng thực tế │
+│  - Bấm "Xác nhận đã nhận tiền" trên giao diện Odoo     │
+│  - Wizard kiểm tra:                                    │
+│    * Quyền: group_payment_confirmer                    │
+│    * SoD: User xác nhận != Người tạo đơn (user_id)     │
+│    * Nếu lệch tiền: BẮT BUỘC nhập chứng từ giải trình  │
+│  - Hạch toán: Tạo SO -> Post Invoice -> Post Payment   │
+│  - Reconcile công nợ hóa đơn & thanh toán              │
+│  - Ghi Audit Log bất biến: 'manual_confirmed'          │
+└───────────────────────────┬────────────────────────────┘
+                            │ POST /api/v1/payments/{id}/vietqr-confirm/
+                            │ (HMAC-SHA256 ký trên raw body)
+┌───────────────────────────▼────────────────────────────┐
+│         Django Backend: Cập nhật state='paid'          │
+│   (Nếu mất mạng -> Lưu vào Transactional Outbox để retry)│
+└────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 2. Đặc Tả Webhook API (API Contracts)
+## 2. Cấu Hình Tham Số Hệ Thống (System Parameters)
 
-### Endpoint 1: Thanh toán thành công (`booking.paid`)
-- **URL**: `POST /api/v1/travel/booking-paid`
+Các khóa cấu hình bảo mật được lưu tại `ir.config_parameter`:
+
+| Tham Số (Key) | Giá Trị Mẫu Local | Ý Nghĩa / Mục Đích |
+| :--- | :--- | :--- |
+| `travel.webhook_secret` | `<WEBHOOK_SECRET_PLACEHOLDER>` (`star_travels_super_secret_webhook_key_2026`) | Khóa bí mật chung dùng để ký và verify chữ ký HMAC-SHA256 (cho cả 2 chiều Odoo ↔ Django). |
+| `travel.inbound_api_key` | `<INBOUND_API_TOKEN_PLACEHOLDER>` (`star_travels_inbound_api_token_2026`) | Token xác thực qua header `Authorization: Bearer <token>` hoặc `X-API-Key`. |
+| `travel.public_platform_url` | `http://host.docker.internal:8000` (hoặc domain Django) | Base URL của Django backend để Odoo gọi callback xác nhận VietQR. |
+| `star_travels.vietqr_pending_timeout_hours` | `4` | Số giờ tối đa một đơn VietQR ở trạng thái pending trước khi kích hoạt cảnh báo Activity cho kế toán. |
+
+### Cấu hình nhanh qua Odoo Shell:
+```python
+env['ir.config_parameter'].sudo().set_param('travel.webhook_secret', 'star_travels_super_secret_webhook_key_2026')
+env['ir.config_parameter'].sudo().set_param('travel.inbound_api_key', 'star_travels_inbound_api_token_2026')
+env['ir.config_parameter'].sudo().set_param('travel.public_platform_url', 'http://localhost:8000')
+env['ir.config_parameter'].sudo().set_param('star_travels.vietqr_pending_timeout_hours', '4')
+```
+
+---
+
+## 3. Quy Trình Thao Tác Kế Toán: Xác Nhận VietQR Thủ Công
+
+> [!IMPORTANT]
+> **Lưu ý nghiệp vụ:** Chuyển khoản VietQR là quy trình thủ công có độ trễ phụ thuộc vào thời điểm khách chuyển và hệ thống ngân hàng xử lý. Kế toán viên cần kiểm tra biến động số dư / sao kê Internet Banking thực tế trước khi xác nhận trên Odoo.
+
+### Bước 1: Tiếp nhận hàng đợi chờ duyệt
+1. Vào menu **Kế toán > Bút toán sổ sách > Xác Nhận Chuyển Khoản VietQR** (hoặc menu **Báo cáo > Đối Soát Thanh Toán > Hàng Đợi VietQR Chờ Duyệt**).
+2. Danh sách hiển thị các khoản chuyển khoản đang ở trạng thái **Chờ xác nhận**:
+   - `Thời gian tạo`: Thời điểm khách quét QR.
+   - `Chờ (Giờ)`: Số giờ đơn hàng đang chờ duyệt (đổi màu vàng sau 2 giờ, màu đỏ sau 4 giờ).
+   - `Mã Booking`: Mã đơn hàng đối chiếu.
+   - `Nội dung CK đối chiếu`: Cú pháp chuyển khoản khách được cấp trên web (VD: `STAR ST-202610-001`).
+   - `Số tiền cần chuyển`: Số tiền đơn hàng.
+
+### Bước 2: Kiểm tra sao kê ngân hàng & Xác nhận tiền về
+1. Mở app ngân hàng doanh nghiệp hoặc cổng thông báo biến động số dư.
+2. Tìm giao dịch có nội dung chuyển khoản khớp với cột **Nội dung CK đối chiếu**.
+3. Bấm nút **Xác nhận tiền** trên dòng tương ứng (hoặc mở form xem chi tiết rồi bấm **Xác nhận đã nhận tiền**).
+4. Cửa sổ Wizard hiện ra:
+   - **Số tiền thực nhận**: Mặc định hiển thị số tiền yêu cầu. Nếu khách chuyển thiếu hoặc thừa, kế toán nhập số tiền thực tế vào tài khoản.
+   - **Ngày giờ nhận tiền thực tế**: Nhập thời gian giao dịch trên sao kê.
+   - **Mã tham chiếu NH (FT Code)**: Nhập mã bút toán giao dịch ngân hàng (VD: `FT241088921` hoặc số Trace).
+   - **Ghi chú đối soát**: *Bắt buộc nhập nếu số tiền thực nhận có sai lệch so với số tiền ban đầu!*
+5. Bấm **Xác Nhận Đã Nhận Tiền**:
+   - Hệ thống tự động hạch toán Đơn bán hàng, Hóa đơn và Bút toán thanh toán vào sổ cái kế toán.
+   - Ghi nhận 1 dòng kiểm toán bất biến vào **Audit Trail**.
+   - Tự động gọi API báo sang Django backend để kích hoạt đơn trên website. Nếu kết nối mạng gián đoạn, hệ thống tự động lưu vào **Transactional Outbox** để tiếp tục thử lại (retry), đảm bảo tuyệt đối không mất dữ liệu kế toán.
+
+### Bước 3: Xử lý giao dịch không tìm thấy tiền về (Từ chối)
+- Trường hợp khách ấn xác nhận trên web nhưng quá hạn vẫn không thấy tiền vào tài khoản ngân hàng:
+  1. Bấm nút **Từ chối**.
+  2. Nhập rõ lý do (VD: *Kiểm tra sao kê Vietcombank lúc 17:00 ngày 08/10 không thấy tiền về*).
+  3. Bấm **Xác Nhận Từ Chối**: Đơn chuyển sang trạng thái `rejected` và được ghi nhận vào Audit Log.
+
+---
+
+## 4. Kiểm Soát Nội Bộ & Quy Chuẩn Audit Trail
+
+### 1. Tính chất Bất biến (Append-Only Immutability)
+- Toàn bộ thay đổi trạng thái đều được ghi nhận vào model `star.travels.payment.audit.log`.
+- Phương thức `write()` và `unlink()` của model này được ghi đè để **luôn luôn chặn (raise UserError)**. Ngay cả tài khoản Administrator hay thao tác qua Odoo Developer Mode / Studio cũng **không thể sửa đổi hay xóa bỏ** bất kỳ dòng log nào.
+
+### 2. Tách biệt vai trò (Separation of Duties - SoD)
+- Nhóm quyền: `Kế toán Xác Nhận Thanh Toán` (`star_travels_payment_sync.group_payment_confirmer`). Chỉ nhân viên kế toán mới thấy và thực hiện được nút duyệt tiền.
+- **Quy tắc ngăn chặn tự phê duyệt**: Một nhân viên kinh doanh (Salesperson) tạo đơn hàng thì chính nhân viên đó **không được phép tự xác nhận thanh toán** cho đơn hàng của mình. Thao tác tự duyệt sẽ bị hệ thống chặn đứng và ghi lại cảnh báo vi phạm SoD vào Audit Trail.
+
+### 3. Xuất Báo Cáo Kiểm Toán (Export Excel)
+- Vào menu **Báo cáo > Đối Soát Thanh Toán > Nhật Ký Kiểm Toán (Audit Trail)**.
+- Bấm nút **Xuất Báo Cáo Excel (CSV)** trên thanh công cụ để tải file báo cáo đã được định dạng chuẩn UTF-8 BOM, hỗ trợ mở trực tiếp trên Excel hiển thị đầy đủ tiếng Việt.
+- Bộ lọc nhanh **Có sai lệch tiền (Discrepancy)** giúp kiểm toán viên lọc ngay các khoản có tiền thực nhận lệch so với tiền yêu cầu.
+
+---
+
+## 5. Danh Sách Endpoint Webhook & Mẫu Gọi API
+
+### 1. Inbound: Django gửi thông tin VietQR Pending sang Odoo
+- **Endpoint**: `POST /api/v1/travel/payment-pending`
 - **Headers**:
-  * `Content-Type: application/json`
-  * `X-Signature-SHA256: <hmac_hex_digest>`
-  * `Idempotency-Key: <uuid>`
-- **Payload mẫu**:
+  - `Content-Type: application/json`
+  - `X-Signature-SHA256: <hmac_sha256_hex(secret, raw_body)>`
+  - `Idempotency-Key: <uuid-v4>`
+
 ```json
 {
-  "event_id": "c5f590fc-25ee-4614-a957-3a05953051da",
-  "event_type": "booking.paid",
+  "event_id": "8a7b6c5d-1111-2222-3333-444455556666",
+  "event_type": "payment.pending",
   "data": {
-    "booking_id": "11111111-2222-3333-4444-555555555555",
+    "payment_id": "tx_vietqr_20261008_001",
+    "booking_id": "book-uuid-1234",
     "booking_code": "ST-PQ-001",
-    "customer": {
-      "name": "Nguyễn Văn Du Khách",
-      "email": "traveler@example.com",
-      "phone": "0912345678"
-    },
-    "items": [
-      {
-        "tour_slug": "tour-phu-quoc-sunset",
-        "title": "Tour Phú Quốc Sunset Cruise",
-        "adults": 2,
-        "children": 1,
-        "price_adult": 1500000.0,
-        "price_child": 1000000.0
-      }
-    ],
-    "payment": {
-      "gateway": "vnpay",
-      "gateway_transaction_id": "VNP14889211",
-      "amount": 4000000.0
-    }
+    "amount": 2500000.0,
+    "bank_transfer_content": "STAR ST-PQ-001",
+    "customer_name": "Nguyễn Văn Du Khách",
+    "customer_email": "traveler@example.com",
+    "customer_phone": "0912345678",
+    "salesperson_email": "sales.tour@startravels.vn"
   }
 }
 ```
 
-### Endpoint 2: Hoàn tiền booking (`booking.refunded`)
-- **URL**: `POST /api/v1/travel/booking-refunded`
-- **Payload mẫu**:
+### 2. Outbound: Odoo gọi sang Django xác nhận tiền đã về
+- **Endpoint trên Django**: `POST /api/v1/payments/{payment_id}/vietqr-confirm/`
+- **Headers**:
+  - `Content-Type: application/json`
+  - `X-Signature-SHA256: <hmac_sha256_hex(secret, raw_body)>`
+  - `Idempotency-Key: <uuid-v4>`
+
 ```json
 {
-  "event_id": "d8a113bc-79f9-42b8-9333-4f93498b8712",
-  "event_type": "booking.refunded",
-  "data": {
-    "booking_id": "11111111-2222-3333-4444-555555555555",
-    "refund_amount": 2000000.0,
-    "reason": "Khách hủy vé theo chính sách hoàn tiền 50%",
-    "refund_transaction_id": "RF-VNP-998811",
-    "gateway": "vnpay"
-  }
+  "payment_id": "tx_vietqr_20261008_001",
+  "booking_code": "ST-PQ-001",
+  "amount_confirmed": 2500000.0,
+  "confirmed_by": "Nguyễn Kế Toán",
+  "confirmed_at": "2026-10-08T18:45:00",
+  "bank_reference": "FT241088921",
+  "source": "manual_odoo_ui"
 }
 ```
 
 ---
 
-## 3. Cấu Hình Tham Số Hệ Thống
+## 6. Hướng Dẫn Đồng Bộ Secret Key Cho Team DevOps
 
-Các tham số trong `ir.config_parameter`:
-- `travel.webhook_secret`: Khóa bí mật dùng để tính toán chữ ký HMAC-SHA256. Mặc định kiểm thử: `star_travels_super_secret_webhook_key_2026`.
-- `travel.inbound_api_key`: Khóa API dùng để xác thực Bearer token hoặc header `X-API-Key`.
+Khi triển khai môi trường Production / Staging, Team DevOps cần đảm bảo 2 repo có các giá trị biến môi trường đồng bộ như sau:
+
+| Thông Số | Giá Trị Cần Cấu Hình Trên Django | Giá Trị Cần Cấu Hình Trên Odoo (`ir.config_parameter`) |
+| :--- | :--- | :--- |
+| **Shared Webhook Secret** | `ODOO_WEBHOOK_SECRET` | `travel.webhook_secret` |
+| **Inbound API Token** | `ODOO_API_KEY` | `travel.inbound_api_key` |
+| **Django Base URL** | `DJANGO_PUBLIC_URL` | `travel.public_platform_url` |
