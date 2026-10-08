@@ -22,15 +22,18 @@ def parse_statement_csv(csv_text: str, gateway: str = "vnpay"):
     delimiter = ";" if ";" in csv_text.splitlines()[0] else ("," if "," in csv_text.splitlines()[0] else "\t")
     reader = csv.reader(f, delimiter=delimiter)
 
-    headers = None
-    rows = []
+    headers: list[str] = []
+    rows: list[list[str]] = []
     for r in reader:
         if not r or not any(r):
             continue
-        if headers is None:
+        if not headers:
             headers = [h.strip().lower().replace(" ", "_").replace("-", "_") for h in r]
         else:
             rows.append(r)
+
+    if not headers:
+        return []
 
     tx_id_candidates = ["gateway_transaction_id", "vnp_transactionno", "transaction_id", "ma_giao_dich"]
     amount_candidates = ["amount", "vnp_amount", "so_tien", "total_amount"]

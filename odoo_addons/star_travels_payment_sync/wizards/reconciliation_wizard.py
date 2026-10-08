@@ -108,12 +108,12 @@ class StarTravelsReconciliationWizard(models.TransientModel):
         f = io.StringIO(decoded_text)
         reader = csv.reader(f, delimiter=delimiter)
 
-        headers = None
-        rows = []
+        headers: list[str] = []
+        rows: list[list[str]] = []
         for row in reader:
             if not row or not any(row):
                 continue
-            if headers is None:
+            if not headers:
                 headers = [self._normalize_header(h) for h in row]
             else:
                 rows.append(row)
