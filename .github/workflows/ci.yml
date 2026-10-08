@@ -29,11 +29,11 @@ jobs:
       - name: Install Linting & Code Quality Tools
         run: |
           python -m pip install --upgrade pip
-          pip install ruff
+          python -m pip install ruff
 
       - name: Run Ruff Linter
         run: |
-          ruff check .
+          python -m ruff check .
 
       - name: Validate XML Manifests & View Architecture
         run: |
@@ -91,11 +91,11 @@ jobs:
 
       - name: Run Odoo Native Tests (HttpCase & TransactionCase)
         run: |
-          docker compose run --rm odoo odoo -d odoo_ci_test \
-            -i base,mail,contacts,crm,travel_core,travel_cms,travel_crm,travel_partner,travel_integration \
+          docker compose run --rm odoo odoo -d odoo_ci_test --db-filter=.* \
+            -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --test-enable \
-            --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration \
+            --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration,/star_travels_payment_sync \
             --stop-after-init --log-level=test
 
       - name: Teardown Services
@@ -122,7 +122,7 @@ jobs:
       - name: Install E2E Test Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest requests
+          python -m pip install pytest requests
 
       - name: Start Postgres & Initialize Odoo Database
         run: |
@@ -133,8 +133,8 @@ jobs:
           done
 
           # Initialize database schema and modules
-          docker compose run --rm odoo odoo -d odoo_travel \
-            -i base,mail,contacts,crm,travel_core,travel_cms,travel_crm,travel_partner,travel_integration \
+          docker compose run --rm odoo odoo -d odoo_travel --db-filter=.* \
+            -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --stop-after-init
 
