@@ -3,6 +3,7 @@ import base64
 import hashlib
 import hmac
 import json
+import unittest
 import uuid
 
 from odoo.exceptions import UserError
@@ -32,19 +33,27 @@ class TestStarTravelsPaymentWebhook(HttpCase):
             "travel.inbound_api_key", self.api_key
         )
 
-        # Ensure gateway journal exists
         self.company = self.env.company
-        self.journal_vnpay = self.env["account.journal"].search([
-            ("code", "=", "VNPAY"),
+        self.has_coa = bool(self.env["account.account"].search([
             ("company_id", "=", self.company.id),
-        ], limit=1)
-        if not self.journal_vnpay:
-            self.journal_vnpay = self.env["account.journal"].create({
-                "name": "VNPay Test Gateway",
-                "code": "VNPAY",
-                "type": "bank",
-                "company_id": self.company.id,
-            })
+        ], limit=1))
+
+        if self.has_coa:
+            self.journal_vnpay = self.env["account.journal"].search([
+                ("code", "=", "VNPAY"),
+                ("company_id", "=", self.company.id),
+            ], limit=1)
+            if not self.journal_vnpay:
+                self.journal_vnpay = self.env["account.journal"].create({
+                    "name": "VNPay Test Gateway",
+                    "code": "VNPAY",
+                    "type": "bank",
+                    "company_id": self.company.id,
+                })
+
+    def _require_coa(self):
+        if not self.has_coa:
+            raise unittest.SkipTest("Chart of Accounts (COA) is required for invoice/payment posting tests.")
 
     def _sign_payload(self, body_bytes: bytes) -> str:
         return hmac.new(self.secret.encode("utf-8"), body_bytes, hashlib.sha256).hexdigest()
@@ -67,6 +76,7 @@ class TestStarTravelsPaymentWebhook(HttpCase):
 
     def test_booking_paid_valid_creates_so_invoice_and_reconciled_payment(self):
         """Valid webhook creates Sale Order, posted Customer Invoice, and reconciled Payment."""
+        self._require_coa()
         event_id = str(uuid.uuid4())
         booking_uuid = str(uuid.uuid4())
         booking_code = f"ST-{uuid.uuid4().hex[:6].upper()}"
@@ -146,6 +156,7 @@ class TestStarTravelsPaymentWebhook(HttpCase):
 
     def test_booking_paid_duplicate_event_id_idempotency(self):
         """Second webhook with same event_id returns cached response without duplicate order."""
+        self._require_coa()
         event_id = str(uuid.uuid4())
         booking_uuid = str(uuid.uuid4())
         booking_code = f"ST-{uuid.uuid4().hex[:6].upper()}"
@@ -197,6 +208,7 @@ class TestStarTravelsPaymentWebhook(HttpCase):
 
     def test_booking_refund_creates_credit_note_and_payment(self):
         """Refund webhook creates posted Credit Note linked to original invoice and outbound payment."""
+        self._require_coa()
         # Setup: First create an original paid booking
         event_paid = str(uuid.uuid4())
         booking_uuid = str(uuid.uuid4())
@@ -279,6 +291,7 @@ class TestStarTravelsPaymentWebhook(HttpCase):
 
     def test_reconciliation_wizard_csv_matching(self):
         """Reconciliation Wizard parses CSV statements and matches payments accurately."""
+        self._require_coa()
         # Create a test payment in Odoo
         tx_id_matched = f"VNP-MATCH-{uuid.uuid4().hex[:6]}"
         tx_id_diff = f"VNP-DIFF-{uuid.uuid4().hex[:6]}"

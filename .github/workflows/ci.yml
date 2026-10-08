@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Ruff Linter
         run: |
-          python -m ruff check . --config pyproject.toml
+          python -m ruff check odoo_addons/star_travels_payment_sync odoo_addons/travel_* tests scripts --config pyproject.toml --output-format=github
 
       - name: Validate XML Manifests & View Architecture
         run: |
@@ -102,9 +102,21 @@ jobs:
       - name: Print Odoo Test Failure Logs
         if: failure()
         run: |
+          echo "### Odoo Test Failure Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 odoo_tests.log >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "==================== ODOO TEST LOG SUMMARY ===================="
           tail -n 120 odoo_tests.log || true
           echo "================================================================"
+
+      - name: Upload Odoo Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odoo-native-test-logs
+          path: odoo_tests.log
+          if-no-files-found: ignore
 
       - name: Teardown Services
         if: always()

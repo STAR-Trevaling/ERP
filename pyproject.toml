@@ -15,16 +15,17 @@ errors = { missing-import = "ignore", unbound-name = "ignore", missing-attribute
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-exclude = [
+extend-exclude = [
     ".git",
     ".pytest_cache",
     ".ruff_cache",
     "scratch",
     "scratch/**",
+    "*muk_*",
     "odoo_addons/muk_*",
-    "odoo_addons/muk_*/**",
     "**/muk_*/**",
 ]
+
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
