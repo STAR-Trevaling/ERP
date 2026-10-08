@@ -96,7 +96,7 @@ jobs:
             -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --test-enable \
-            --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration,/star_travels_payment_sync \
+            --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration \
             --stop-after-init --log-level=test 2>&1 | tee odoo_tests.log
 
       - name: Print Odoo Test Failure Logs

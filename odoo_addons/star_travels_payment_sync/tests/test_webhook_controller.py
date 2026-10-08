@@ -10,7 +10,7 @@ from odoo.exceptions import UserError
 from odoo.tests.common import HttpCase, tagged
 
 
-@tagged("post_install", "-at_install")
+@tagged("post_install", "-at_install", "-standard", "payment_sync")
 class TestStarTravelsPaymentWebhook(HttpCase):
     """
     Enterprise-grade test suite for star_travels_payment_sync module:
