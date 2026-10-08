@@ -16,6 +16,7 @@ class AccountPayment(models.Model):
             ("momo", "MoMo"),
             ("zalopay", "ZaloPay"),
             ("stripe", "Stripe"),
+            ("vietqr", "VietQR"),
         ],
         string="Payment Gateway",
         index=True,
