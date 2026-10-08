@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action to view Gateway Payments specifically -->
+    <record id="action_star_travels_gateway_payments" model="ir.actions.act_window">
+        <field name="name">Giao dịch Cổng Thanh Toán</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('x_gateway', '!=', False)]</field>
+        <field name="context">{'search_default_gateway_payments': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có giao dịch thanh toán nào được đồng bộ từ cổng trực tuyến.
+            </p>
+        </field>
+    </record>
+
+    <!-- Reporting & Reconciliation Root Menu under Accounting > Reporting -->
+    <menuitem id="menu_star_travels_payment_root"
+              name="Đối Soát Thanh Toán (STAR)"
+              parent="account.menu_finance_reports"
+              sequence="35"/>
+
+    <!-- Submenu 1: Run Reconciliation Wizard -->
+    <menuitem id="menu_star_travels_reconciliation_wizard"
+              name="Đối Soát Bảng Kê (Wizard)"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_reconciliation_wizard"
+              sequence="10"/>
+
+    <!-- Submenu 2: Gateway Payments List -->
+    <menuitem id="menu_star_travels_gateway_payments"
+              name="Giao Dịch Cổng (VNPay/MoMo/ZaloPay)"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_gateway_payments"
+              sequence="20"/>
+
+    <!-- Submenu 3: Webhook Sync Logs -->
+    <menuitem id="menu_star_travels_webhook_logs"
+              name="Nhật Ký Webhook Đồng Bộ"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_webhook_log"
+              sequence="30"/>
+</odoo>
