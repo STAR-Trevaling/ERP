@@ -146,6 +146,7 @@ jobs:
 
       - name: Start Postgres & Initialize Odoo Database
         run: |
+          set -o pipefail
           docker compose up -d db
           until docker compose exec -T db pg_isready -U odoo; do
             echo "Waiting for postgres to become ready..."
@@ -156,7 +157,16 @@ jobs:
           docker compose run --rm odoo odoo -d odoo_travel --db-filter=.* \
             -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
-            --stop-after-init
+            --stop-after-init 2>&1 | tee odoo_init.log
+
+      - name: Print Database Initialization Failure Logs
+        if: failure()
+        run: |
+          echo "### Odoo Database Init Failure Log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 odoo_init.log >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 odoo_init.log || true
 
       - name: Start Odoo Web Server Daemon
         run: |

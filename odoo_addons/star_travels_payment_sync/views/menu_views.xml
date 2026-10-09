@@ -14,17 +14,17 @@
         </field>
     </record>
 
-    <!-- Operational Menu under Accounting > Customers (Khách hàng) or Accounting > Accounting -->
+    <!-- Operational Menu under Accounting > Customers (Khách hàng) -->
     <menuitem id="menu_star_travels_vietqr_operational"
               name="Xác Nhận Chuyển Khoản VietQR"
-              parent="account.menu_finance_entries"
+              parent="account.menu_finance_receivables"
               action="action_star_travels_payment_pending"
               sequence="15"/>
 
-    <!-- Reporting & Audit Root Menu under Accounting > Reporting -->
+    <!-- Reporting & Audit Root Menu under Accounting > Customers (Khách hàng) -->
     <menuitem id="menu_star_travels_payment_root"
               name="Đối Soát Thanh Toán (STAR)"
-              parent="account.menu_finance_reports"
+              parent="account.menu_finance_receivables"
               sequence="35"/>
 
     <!-- Submenu 1: VietQR Pending Queue -->

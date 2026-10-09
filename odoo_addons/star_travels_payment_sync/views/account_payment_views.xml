@@ -24,7 +24,7 @@
         <field name="model">account.payment</field>
         <field name="inherit_id" ref="account.view_account_payment_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='group2']" position="inside">
+            <xpath expr="//field[@name='journal_id']" position="after">
                 <field name="x_gateway" readonly="state != 'draft'"/>
                 <field name="x_gateway_transaction_id" readonly="state != 'draft'"/>
                 <field name="x_reconciliation_state" widget="badge"
@@ -41,7 +41,8 @@
         <field name="model">account.payment</field>
         <field name="inherit_id" ref="account.view_account_payment_search"/>
         <field name="arch" type="xml">
-            <xpath expr="//filter[@name='state_draft']" position="before">
+            <xpath expr="//search" position="inside">
+                <separator/>
                 <filter string="Chưa đối soát (Pending)" name="reconciliation_pending"
                         domain="[('x_reconciliation_state', '=', 'pending')]"/>
                 <filter string="Đối soát khớp (Matched)" name="reconciliation_matched"
@@ -52,8 +53,6 @@
                 <filter string="Giao dịch Gateway (STAR)" name="gateway_payments"
                         domain="[('x_gateway', '!=', False)]"/>
                 <separator/>
-            </xpath>
-            <xpath expr="//group" position="inside">
                 <filter string="Cổng thanh toán (Gateway)" name="group_by_gateway"
                         context="{'group_by': 'x_gateway'}"/>
                 <filter string="Trạng thái đối soát" name="group_by_reconciliation_state"
