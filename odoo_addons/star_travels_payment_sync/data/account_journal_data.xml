@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- VNPay Payment Gateway Journal -->
+        <record id="journal_gateway_vnpay" model="account.journal">
+            <field name="name">VNPay Gateway</field>
+            <field name="code">VNPAY</field>
+            <field name="type">bank</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="sequence">21</field>
+        </record>
+
+        <!-- MoMo Payment Gateway Journal -->
+        <record id="journal_gateway_momo" model="account.journal">
+            <field name="name">MoMo E-Wallet</field>
+            <field name="code">MOMO</field>
+            <field name="type">bank</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="sequence">22</field>
+        </record>
+
+        <!-- ZaloPay Payment Gateway Journal -->
+        <record id="journal_gateway_zalopay" model="account.journal">
+            <field name="name">ZaloPay E-Wallet</field>
+            <field name="code">ZALOP</field>
+            <field name="type">bank</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="sequence">23</field>
+        </record>
+
+        <!-- VietQR Bank Transfer Journal -->
+        <record id="journal_gateway_vietqr" model="account.journal">
+            <field name="name">VietQR Bank Transfer</field>
+            <field name="code">VIETQR</field>
+            <field name="type">bank</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="sequence">24</field>
+        </record>
+    </data>
+</odoo>

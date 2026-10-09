@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action to view Gateway Payments specifically -->
+    <record id="action_star_travels_gateway_payments" model="ir.actions.act_window">
+        <field name="name">Giao dịch Cổng Thanh Toán</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('x_gateway', '!=', False)]</field>
+        <field name="context">{'search_default_gateway_payments': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có giao dịch thanh toán nào được đồng bộ từ cổng trực tuyến.
+            </p>
+        </field>
+    </record>
+
+    <!-- Operational Menu under Accounting > Customers (Khách hàng) -->
+    <menuitem id="menu_star_travels_vietqr_operational"
+              name="Xác Nhận Chuyển Khoản VietQR"
+              parent="account.menu_finance_receivables"
+              action="action_star_travels_payment_pending"
+              sequence="15"/>
+
+    <!-- Reporting & Audit Root Menu under Accounting > Customers (Khách hàng) -->
+    <menuitem id="menu_star_travels_payment_root"
+              name="Đối Soát Thanh Toán (STAR)"
+              parent="account.menu_finance_receivables"
+              sequence="35"/>
+
+    <!-- Submenu 1: VietQR Pending Queue -->
+    <menuitem id="menu_star_travels_payment_pending_report"
+              name="Hàng Đợi VietQR Chờ Duyệt"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_payment_pending"
+              sequence="5"/>
+
+    <!-- Submenu 2: Audit Trail Log -->
+    <menuitem id="menu_star_travels_payment_audit_log"
+              name="Nhật Ký Kiểm Toán (Audit Trail)"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_payment_audit_log"
+              sequence="15"/>
+
+    <!-- Submenu 3: Run Reconciliation Wizard -->
+    <menuitem id="menu_star_travels_reconciliation_wizard"
+              name="Đối Soát Bảng Kê (Wizard)"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_reconciliation_wizard"
+              sequence="25"/>
+
+    <!-- Submenu 4: Gateway Payments List -->
+    <menuitem id="menu_star_travels_gateway_payments"
+              name="Giao Dịch Cổng (VNPay/MoMo/VietQR)"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_gateway_payments"
+              sequence="35"/>
+
+    <!-- Submenu 5: Webhook Sync Logs -->
+    <menuitem id="menu_star_travels_webhook_logs"
+              name="Nhật Ký Webhook Đồng Bộ"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_webhook_log"
+              sequence="45"/>
+</odoo>

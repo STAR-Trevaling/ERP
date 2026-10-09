@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Audit Log List View (Strict Read-Only) -->
+    <record id="view_star_travels_payment_audit_log_tree" model="ir.ui.view">
+        <field name="name">star.travels.payment.audit.log.list</field>
+        <field name="model">star.travels.payment.audit.log</field>
+        <field name="arch" type="xml">
+            <list string="Nhật Ký Kiểm Toán Thanh Toán (Append-Only)"
+                  create="0" edit="0" delete="0"
+                  decoration-danger="is_discrepancy"
+                  decoration-success="action == 'manual_confirmed' and not is_discrepancy"
+                  decoration-warning="action == 'rejected'">
+                <header>
+                    <button name="action_export_audit_excel" string="Xuất Báo Cáo Excel (CSV)"
+                            type="object" class="btn-primary" icon="fa-download"/>
+                </header>
+                <field name="performed_at" string="Thời điểm"/>
+                <field name="booking_code"/>
+                <field name="action" widget="badge"
+                       decoration-success="action in ('manual_confirmed', 'auto_confirmed')"
+                       decoration-warning="action == 'rejected'"
+                       decoration-info="action == 'pending_received'"/>
+                <field name="source" widget="badge"/>
+                <field name="performed_by" string="Người thực hiện"/>
+                <field name="amount_declared" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="amount_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="is_discrepancy" widget="boolean" string="Sai lệch"/>
+                <field name="evidence_note" string="Ghi chú đối soát" optional="show"/>
+                <field name="ip_address" optional="hide"/>
+                <field name="uuid" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Audit Log Form View -->
+    <record id="view_star_travels_payment_audit_log_form" model="ir.ui.view">
+        <field name="name">star.travels.payment.audit.log.form</field>
+        <field name="model">star.travels.payment.audit.log</field>
+        <field name="arch" type="xml">
+            <form string="Bản Ghi Nhật Ký Kiểm Toán" create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_export_audit_excel" string="Tải Xuống Báo Cáo (CSV)"
+                            type="object" class="btn-secondary" icon="fa-download"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fa fa-lock fa-2x me-3" title="Audit Lock"></i>
+                        <div>
+                            <strong>Bản ghi kiểm toán bất biến (Append-Only Audit Log)</strong>
+                            <p class="mb-0">Dữ liệu được bảo vệ nghiêm ngặt, không thể chỉnh sửa hoặc xóa bỏ.</p>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Thông tin sự kiện">
+                            <field name="uuid"/>
+                            <field name="booking_code"/>
+                            <field name="action" widget="badge"/>
+                            <field name="source" widget="badge"/>
+                            <field name="performed_at"/>
+                            <field name="performed_by"/>
+                            <field name="ip_address"/>
+                        </group>
+                        <group string="Đối chiếu số tiền">
+                            <field name="amount_declared"/>
+                            <field name="amount_confirmed"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="is_discrepancy" widget="boolean"/>
+                            <field name="old_state"/>
+                            <field name="new_state"/>
+                            <field name="payment_id"/>
+                            <field name="pending_payment_id"/>
+                        </group>
+                    </group>
+                    <group string="Chứng từ &amp; Ghi chú kiểm toán">
+                        <field name="evidence_note" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Audit Log Search View -->
+    <record id="view_star_travels_payment_audit_log_search" model="ir.ui.view">
+        <field name="name">star.travels.payment.audit.log.search</field>
+        <field name="model">star.travels.payment.audit.log</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm Audit Log">
+                <field name="booking_code"/>
+                <field name="performed_by"/>
+                <field name="uuid"/>
+                <field name="evidence_note"/>
+                <filter string="Có sai lệch tiền (Discrepancy)" name="filter_discrepancy" domain="[('is_discrepancy', '=', True)]"/>
+                <separator/>
+                <filter string="Xác nhận thủ công" name="filter_manual" domain="[('action', '=', 'manual_confirmed')]"/>
+                <filter string="Từ chối thanh toán" name="filter_rejected" domain="[('action', '=', 'rejected')]"/>
+                <filter string="Tiếp nhận Pending" name="filter_pending" domain="[('action', '=', 'pending_received')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Hành động" name="group_by_action" context="{'group_by': 'action'}"/>
+                    <filter string="Người thực hiện" name="group_by_user" context="{'group_by': 'performed_by'}"/>
+                    <filter string="Nguồn sự kiện" name="group_by_source" context="{'group_by': 'source'}"/>
+                    <filter string="Thời điểm" name="group_by_date" context="{'group_by': 'performed_at:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action Window: Audit Logs -->
+    <record id="action_star_travels_payment_audit_log" model="ir.actions.act_window">
+        <field name="name">Nhật Ký Kiểm Toán Thanh Toán (Audit Trail)</field>
+        <field name="res_model">star.travels.payment.audit.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_star_travels_payment_audit_log_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có dữ liệu kiểm toán thanh toán.
+            </p>
+        </field>
+    </record>
+</odoo>

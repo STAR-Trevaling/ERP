@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_star_travels_vietqr_reject_wizard_form" model="ir.ui.view">
+        <field name="name">star.travels.vietqr.reject.wizard.form</field>
+        <field name="model">star.travels.vietqr.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Từ Chối Giao Dịch Chuyển Khoản">
+                <sheet>
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Cảnh báo:</strong> Thao tác này sẽ đánh dấu giao dịch là Từ chối / Không tìm thấy tiền về, và ghi nhận vào Audit Log.
+                    </div>
+                    <group>
+                        <field name="booking_code" readonly="1"/>
+                        <field name="amount" readonly="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="rejection_reason" placeholder="Ghi rõ lý do (VD: Kiểm tra sao kê lúc 17:30 không có giao dịch với nội dung này)..."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_reject" string="Xác Nhận Từ Chối"
+                            type="object" class="btn-danger"/>
+                    <button string="Đóng" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

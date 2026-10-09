@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Reconciliation Wizard Form View -->
+    <record id="view_star_travels_reconciliation_wizard_form" model="ir.ui.view">
+        <field name="name">star.travels.reconciliation.wizard.form</field>
+        <field name="model">star.travels.reconciliation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Đối Soát Bảng Kê Cổng Thanh Toán">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="status" invisible="state != 'draft'">
+                        <h5 class="alert-heading mb-1">Hướng dẫn đối soát:</h5>
+                        <p class="mb-0">
+                            Tải file bảng kê giao dịch (.CSV) từ cổng quản trị đối tác (VNPay Merchant Portal, MoMo Business, ZaloPay), 
+                            sau đó tải lên tại đây. Hệ thống sẽ tự động quét mã giao dịch <code>gateway_transaction_id</code> và so khớp số tiền với các bút toán thanh toán trong Odoo.
+                        </p>
+                    </div>
+
+                    <group invisible="state != 'draft'">
+                        <group string="Tham số đối soát">
+                            <field name="gateway" widget="radio"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Tập tin dữ liệu">
+                            <field name="statement_file" filename="filename"/>
+                            <field name="filename" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <div invisible="state != 'done'">
+                        <field name="summary_html" widget="html" readonly="1"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_process_reconciliation" string="Bắt đầu Đối Soát"
+                            type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button string="Đóng" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Reconciliation Wizard Action Window -->
+    <record id="action_star_travels_reconciliation_wizard" model="ir.actions.act_window">
+        <field name="name">Đối Soát Bảng Kê VNPay / MoMo</field>
+        <field name="res_model">star.travels.reconciliation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

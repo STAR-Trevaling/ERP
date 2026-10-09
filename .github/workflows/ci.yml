@@ -29,11 +29,11 @@ jobs:
       - name: Install Linting & Code Quality Tools
         run: |
           python -m pip install --upgrade pip
-          pip install ruff
+          python -m pip install ruff
 
       - name: Run Ruff Linter
         run: |
-          ruff check .
+          python -m ruff check odoo_addons/star_travels_payment_sync odoo_addons/travel_* tests scripts --config pyproject.toml --output-format=github
 
       - name: Validate XML Manifests & View Architecture
         run: |
@@ -91,12 +91,31 @@ jobs:
 
       - name: Run Odoo Native Tests (HttpCase & TransactionCase)
         run: |
-          docker compose run --rm odoo odoo -d odoo_ci_test \
-            -i base,mail,contacts,crm,travel_core,travel_cms,travel_crm,travel_partner,travel_integration \
+          set -o pipefail
+          docker compose run --rm odoo odoo -d odoo_ci_test --db-filter=^odoo_ci_test$ \
+            -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --test-enable \
             --test-tags /travel_core,/travel_cms,/travel_partner,/travel_crm,/travel_integration \
-            --stop-after-init --log-level=test
+            --stop-after-init --log-level=test 2>&1 | tee odoo_tests.log
+
+      - name: Print Odoo Test Failure Logs
+        if: failure()
+        run: |
+          echo "==================== ODOO TEST LOG SUMMARY ===================="
+          tail -n 120 odoo_tests.log || true
+          echo "================================================================"
+          grep -E "ERROR|CRITICAL|Traceback|Exception|Failed|FAILED" odoo_tests.log | tail -n 25 | while read -r line; do
+            echo "::error title=OdooTestError::$line"
+          done
+
+      - name: Upload Odoo Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odoo-native-test-logs
+          path: odoo_tests.log
+          if-no-files-found: ignore
 
       - name: Teardown Services
         if: always()
@@ -122,10 +141,11 @@ jobs:
       - name: Install E2E Test Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest requests
+          python -m pip install pytest requests
 
       - name: Start Postgres & Initialize Odoo Database
         run: |
+          set -o pipefail
           docker compose up -d db
           until docker compose exec -T db pg_isready -U odoo; do
             echo "Waiting for postgres to become ready..."
@@ -133,10 +153,20 @@ jobs:
           done
 
           # Initialize database schema and modules
-          docker compose run --rm odoo odoo -d odoo_travel \
-            -i base,mail,contacts,crm,travel_core,travel_cms,travel_crm,travel_partner,travel_integration \
+          docker compose run --rm odoo odoo -d odoo_travel --db-filter=^odoo_travel$ \
+            -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
-            --stop-after-init
+            --stop-after-init 2>&1 | tee odoo_init.log
+
+      - name: Print Database Initialization Failure Logs
+        if: failure()
+        run: |
+          echo "==================== ODOO INIT LOG SUMMARY ===================="
+          tail -n 120 odoo_init.log || true
+          echo "================================================================"
+          grep -E "ERROR|CRITICAL|Traceback|Exception|Failed|FAILED" odoo_init.log | tail -n 25 | while read -r line; do
+            echo "::error title=OdooInitError::$line"
+          done
 
       - name: Start Odoo Web Server Daemon
         run: |

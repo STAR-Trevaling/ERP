@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pending Payment List View -->
+    <record id="view_star_travels_payment_pending_tree" model="ir.ui.view">
+        <field name="name">star.travels.payment.pending.list</field>
+        <field name="model">star.travels.payment.pending</field>
+        <field name="arch" type="xml">
+            <list string="Giao Dịch Chuyển Khoản VietQR Chờ Duyệt"
+                  decoration-warning="state == 'pending' and wait_hours &gt;= 2"
+                  decoration-danger="state == 'pending' and wait_hours &gt;= 4"
+                  decoration-success="state == 'confirmed'"
+                  decoration-muted="state == 'rejected'">
+                <field name="created_at" string="Thời gian tạo"/>
+                <field name="wait_hours" widget="float_time" string="Chờ (Giờ)"/>
+                <field name="booking_code"/>
+                <field name="customer_name"/>
+                <field name="bank_transfer_content"/>
+                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="amount_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="user_id" string="Salesperson" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'pending'"
+                       decoration-success="state == 'confirmed'"
+                       decoration-danger="state == 'rejected'"/>
+                <button name="action_open_confirm_wizard" string="Xác nhận tiền"
+                        type="object" class="btn-success"
+                        invisible="state != 'pending'"
+                        groups="account.group_account_user"/>
+                <button name="action_open_reject_wizard" string="Từ chối"
+                        type="object" class="btn-outline-danger"
+                        invisible="state != 'pending'"
+                        groups="account.group_account_user"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Pending Payment Form View -->
+    <record id="view_star_travels_payment_pending_form" model="ir.ui.view">
+        <field name="name">star.travels.payment.pending.form</field>
+        <field name="model">star.travels.payment.pending</field>
+        <field name="arch" type="xml">
+            <form string="Giao Dịch VietQR Chờ Xác Nhận">
+                <header>
+                    <button name="action_open_confirm_wizard" string="Xác nhận đã nhận tiền"
+                            type="object" class="btn-primary"
+                            invisible="state != 'pending'"
+                            groups="account.group_account_user"/>
+                    <button name="action_open_reject_wizard" string="Từ chối / Không tìm thấy"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'pending'"
+                            groups="account.group_account_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="booking_code"/>
+                        <h1>
+                            <field name="booking_code" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Chi tiết chuyển khoản">
+                            <field name="bank_transfer_content" readonly="1"/>
+                            <field name="amount" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="created_at" readonly="1"/>
+                            <field name="wait_hours" widget="float_time" readonly="1"/>
+                            <field name="payment_id" readonly="1"/>
+                            <field name="user_id" readonly="state != 'pending'"/>
+                        </group>
+                        <group string="Khách hàng">
+                            <field name="customer_name" readonly="1"/>
+                            <field name="customer_email" readonly="1"/>
+                            <field name="customer_phone" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Kết quả xác nhận kế toán" invisible="state == 'pending'">
+                        <group>
+                            <field name="amount_confirmed" readonly="1"/>
+                            <field name="bank_reference" readonly="1"/>
+                            <field name="confirmed_by" readonly="1"/>
+                            <field name="confirmed_at" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="payment_id_account" readonly="1"/>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="invoice_id" readonly="1"/>
+                            <field name="rejection_reason" invisible="state != 'rejected'" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lịch sử Audit Trail" name="audit_logs">
+                            <field name="audit_log_ids" readonly="1">
+                                <list>
+                                    <field name="performed_at"/>
+                                    <field name="action" widget="badge"/>
+                                    <field name="performed_by"/>
+                                    <field name="amount_declared"/>
+                                    <field name="amount_confirmed"/>
+                                    <field name="evidence_note"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Dữ liệu kỹ thuật" name="technical">
+                            <field name="raw_payload" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Pending Payment Search View -->
+    <record id="view_star_travels_payment_pending_search" model="ir.ui.view">
+        <field name="name">star.travels.payment.pending.search</field>
+        <field name="model">star.travels.payment.pending</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm giao dịch VietQR">
+                <field name="booking_code"/>
+                <field name="bank_transfer_content"/>
+                <field name="customer_name"/>
+                <field name="payment_id"/>
+                <filter string="Chờ xác nhận (Pending)" name="state_pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Chờ quá 4 giờ (Cảnh báo)" name="stale_pending" domain="[('state', '=', 'pending'), ('wait_hours', '&gt;=', 4)]"/>
+                <filter string="Đã xác nhận" name="state_confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Từ chối" name="state_rejected" domain="[('state', '=', 'rejected')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Trạng thái" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Salesperson" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Ngày tạo" name="group_by_date" context="{'group_by': 'created_at:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action Window: VietQR Pending Payments -->
+    <record id="action_star_travels_payment_pending" model="ir.actions.act_window">
+        <field name="name">Xác Nhận Chuyển Khoản VietQR</field>
+        <field name="res_model">star.travels.payment.pending</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_state_pending': 1}</field>
+        <field name="search_view_id" ref="view_star_travels_payment_pending_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Không có giao dịch VietQR nào đang chờ xử lý!
+            </p>
+            <p>
+                Khi khách hàng chọn phương thức VietQR trên website, thông tin chuyển khoản sẽ xuất hiện tại đây để kế toán đối chiếu sao kê ngân hàng và xác nhận.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_star_travels_vietqr_confirm_wizard_form" model="ir.ui.view">
+        <field name="name">star.travels.vietqr.confirm.wizard.form</field>
+        <field name="model">star.travels.vietqr.confirm.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Xác Nhận Tiền Chuyển Khoản VietQR">
+                <sheet>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fa fa-exclamation-triangle fa-2x me-3" title="Warning"></i>
+                        <div>
+                            <strong>Lưu ý kiểm soát nội bộ &amp; Kiểm toán:</strong>
+                            <p class="mb-0">
+                                Thao tác này sẽ ghi nhận tiền thực tế đã vào tài khoản ngân hàng của công ty, tự động tạo Đơn hàng, Hóa đơn và Bút toán thanh toán vào Sổ cái, đồng thời ghi vết kiểm toán không thể xóa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group string="Thông tin đối chiếu">
+                            <field name="booking_code"/>
+                            <field name="customer_name"/>
+                            <field name="bank_transfer_content"/>
+                            <field name="amount_declared"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Thông tin sao kê thực tế">
+                            <field name="amount_confirmed"/>
+                            <field name="confirmed_date"/>
+                            <field name="bank_reference" placeholder="VD: FT241088921 hoặc Mã GD sao kê"/>
+                        </group>
+                    </group>
+
+                    <group string="Chứng từ &amp; Ghi chú đối soát">
+                        <field name="evidence_note"
+                               placeholder="Bắt buộc nhập nếu số tiền thực nhận khác với số tiền yêu cầu. Ghi rõ số tài khoản NH nhận, thời gian nhận hoặc lý do sai lệch."/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" string="Xác Nhận Đã Nhận Tiền"
+                            type="object" class="btn-success"/>
+                    <button string="Hủy Bỏ" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

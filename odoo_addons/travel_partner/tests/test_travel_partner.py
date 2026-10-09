@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from odoo.exceptions import UserError
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, tagged
 
 
+@tagged('post_install', '-at_install')
 class TestTravelPartner(TransactionCase):
 
     def setUp(self):

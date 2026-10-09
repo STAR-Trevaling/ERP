@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Webhook Log List View -->
+    <record id="view_star_travels_webhook_log_tree" model="ir.ui.view">
+        <field name="name">star.travels.webhook.log.list</field>
+        <field name="model">star.travels.webhook.log</field>
+        <field name="arch" type="xml">
+            <list string="Payment Webhook Logs"
+                  decoration-success="state == 'success'"
+                  decoration-danger="state == 'failed'"
+                  create="0">
+                <field name="processed_at"/>
+                <field name="event_id"/>
+                <field name="event_type" widget="badge"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'success'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="res_model"/>
+                <field name="res_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Webhook Log Form View -->
+    <record id="view_star_travels_webhook_log_form" model="ir.ui.view">
+        <field name="name">star.travels.webhook.log.form</field>
+        <field name="model">star.travels.webhook.log</field>
+        <field name="arch" type="xml">
+            <form string="Payment Webhook Log" create="0">
+                <sheet>
+                    <group>
+                        <group string="Chi tiết sự kiện">
+                            <field name="event_id"/>
+                            <field name="event_type" widget="badge"/>
+                            <field name="processed_at"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'success'"
+                                   decoration-danger="state == 'failed'"/>
+                        </group>
+                        <group string="Bản ghi liên kết">
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Kết quả phản hồi (Result JSON)">
+                            <field name="result_summary" readonly="1"/>
+                        </page>
+                        <page string="Raw Webhook Payload">
+                            <field name="payload" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Webhook Log Search View -->
+    <record id="view_star_travels_webhook_log_search" model="ir.ui.view">
+        <field name="name">star.travels.webhook.log.search</field>
+        <field name="model">star.travels.webhook.log</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm Webhook Log">
+                <field name="event_id"/>
+                <field name="event_type"/>
+                <field name="res_model"/>
+                <filter string="Thành công" name="state_success" domain="[('state', '=', 'success')]"/>
+                <filter string="Thất bại" name="state_failed" domain="[('state', '=', 'failed')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Loại sự kiện" name="group_by_type" context="{'group_by': 'event_type'}"/>
+                    <filter string="Trạng thái" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Webhook Log Action Window -->
+    <record id="action_star_travels_webhook_log" model="ir.actions.act_window">
+        <field name="name">Nhật ký Webhook Thanh Toán</field>
+        <field name="res_model">star.travels.webhook.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_star_travels_webhook_log_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có sự kiện thanh toán hoặc hoàn tiền nào được gửi từ Django.
+            </p>
+        </field>
+    </record>
+</odoo>
