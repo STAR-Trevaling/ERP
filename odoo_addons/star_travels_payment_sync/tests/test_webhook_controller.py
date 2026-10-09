@@ -436,3 +436,220 @@ VNP-UNKNOWN-999,500000,TCB
         wizard.action_confirm()
         self.assertEqual(pending.state, "confirmed")
         self.assertEqual(pending.amount_confirmed, 1900000.0)
+
+    def test_booking_paid_dual_key_rotation_acceptance(self):
+        """Webhook signed with previous secret during rotation grace period must be accepted."""
+        self._require_coa()
+        prev_secret = "star_travels_old_rotated_secret_key"
+        self.env["ir.config_parameter"].sudo().set_param(
+            "travel.webhook_secret_previous", prev_secret
+        )
+
+        event_id = str(uuid.uuid4())
+        booking_uuid = str(uuid.uuid4())
+        payload = {
+            "event_id": event_id,
+            "event_type": "booking.paid",
+            "data": {
+                "booking_id": booking_uuid,
+                "booking_code": f"ST-ROT-{uuid.uuid4().hex[:6].upper()}",
+                "customer": {"name": "Rotation Customer", "email": "rot@test.com"},
+                "payment": {"gateway": "vnpay", "amount": 1000000.0},
+            },
+        }
+        body_bytes = json.dumps(payload).encode("utf-8")
+        # Sign with PREVIOUS secret
+        signature = hmac.new(prev_secret.encode("utf-8"), body_bytes, hashlib.sha256).hexdigest()
+
+        resp = self.url_open(
+            "/api/v1/travel/booking-paid",
+            data=body_bytes,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature-SHA256": signature,
+                "Idempotency-Key": event_id,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json().get("success"))
+
+    def test_booking_paid_auto_balances_discount_voucher_line(self):
+        """When items sum > total_amount (promo discount applied), auto-injects discount line to balance."""
+        self._require_coa()
+        event_id = str(uuid.uuid4())
+        booking_uuid = str(uuid.uuid4())
+        booking_code = f"ST-DISC-{uuid.uuid4().hex[:6].upper()}"
+
+        # Items list price: 3,000,000 VND. Total paid after voucher: 2,700,000 VND
+        payload = {
+            "event_id": event_id,
+            "event_type": "booking.paid",
+            "data": {
+                "booking_id": booking_uuid,
+                "booking_code": booking_code,
+                "customer": {"name": "Discount Voucher User", "email": "voucher@test.com"},
+                "items": [
+                    {
+                        "title": "Da Nang Beach Escape",
+                        "price": 3000000.0,
+                        "quantity": 1,
+                    }
+                ],
+                "payment": {
+                    "gateway": "vnpay",
+                    "amount": 2700000.0,
+                },
+            },
+        }
+        body_bytes = json.dumps(payload).encode("utf-8")
+        signature = self._sign_payload(body_bytes)
+
+        resp = self.url_open(
+            "/api/v1/travel/booking-paid",
+            data=body_bytes,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature-SHA256": signature,
+                "Idempotency-Key": event_id,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data.get("success"))
+
+        so = self.env["sale.order"].sudo().browse(data["odoo_sale_order_id"])
+        # Verify Sale Order total was balanced to exactly 2,700,000 VND
+        self.assertEqual(so.amount_total, 2700000.0)
+        discount_lines = so.order_line.filtered(lambda line: line.price_unit < 0)
+        self.assertEqual(len(discount_lines), 1)
+        self.assertEqual(discount_lines.price_unit, -300000.0)
+
+        # Verify Invoice total matches exactly 2,700,000 VND
+        inv = self.env["account.move"].sudo().browse(data["odoo_invoice_id"])
+        self.assertEqual(inv.amount_total, 2700000.0)
+        self.assertIn(inv.payment_state, ("in_payment", "paid"))
+
+    def test_referral_created_with_contact_routes_sales(self):
+        """Referral with contact info creates crm.lead with [PARTNER_REFERRAL] and [WARM_REFERRAL], routed to Sales team."""
+        event_id = str(uuid.uuid4())
+        booking_uuid = str(uuid.uuid4())
+        payload = {
+            "event_id": event_id,
+            "event_type": "referral.created",
+            "data": {
+                "booking_id": booking_uuid,
+                "item_type": "accommodation_referral",
+                "item_name": "Khách sạn Mường Thanh Grand Hạ Long",
+                "referral_partner_name": "Booking.com",
+                "destination": "ha-long",
+                "contact_name": "Nguyen Thi Minh C",
+                "contact_phone": "0912345678",
+                "contact_email": "minhc@test.com",
+                "has_contact_info": True,
+                "partner_commission_rate": 6.5,
+                "estimated_value": 3500000.0,
+            },
+        }
+        body_bytes = json.dumps(payload).encode("utf-8")
+        signature = self._sign_payload(body_bytes)
+
+        resp = self.url_open(
+            "/api/v1/travel/referral-created",
+            data=body_bytes,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature-SHA256": signature,
+                "Idempotency-Key": event_id,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data.get("success"))
+        self.assertTrue(data.get("routed_to_sales"))
+        self.assertEqual(data.get("type"), "lead")
+        lead_id = data.get("lead_id")
+
+        lead = self.env["crm.lead"].sudo().browse(lead_id)
+        self.assertEqual(lead.type, "lead")
+        self.assertTrue(lead.x_is_referral)
+        self.assertTrue(lead.x_has_contact_info)
+        self.assertEqual(lead.x_referral_partner_name, "Booking.com")
+        self.assertEqual(lead.contact_name, "Nguyen Thi Minh C")
+        self.assertEqual(lead.phone, "0912345678")
+
+        # Verify Tags: MUST have both [PARTNER_REFERRAL] and [WARM_REFERRAL]
+        tag_names = lead.tag_ids.mapped("name")
+        self.assertIn("[PARTNER_REFERRAL]", tag_names)
+        self.assertIn("[WARM_REFERRAL]", tag_names)
+
+        # Verify Commission Calculation: 3,500,000 * 6.5% = 227,500 VND
+        self.assertEqual(lead.x_referral_estimated_commission, 227500.0)
+
+    def test_referral_created_without_contact_stats_only(self):
+        """Referral click without contact info must be stored for analytics ONLY, not routed to Sales team."""
+        event_id = str(uuid.uuid4())
+        booking_uuid = str(uuid.uuid4())
+        payload = {
+            "event_id": event_id,
+            "event_type": "referral.created",
+            "data": {
+                "booking_id": booking_uuid,
+                "item_type": "restaurant_referral",
+                "item_name": "Nhà Hàng Cua Vàng Tuần Châu",
+                "referral_partner_name": "Klook",
+                "destination": "ha-long",
+                "contact_name": None,
+                "contact_phone": None,
+                "has_contact_info": False,
+                "partner_commission_rate": 5.0,
+                "estimated_value": 1000000.0,
+            },
+        }
+        body_bytes = json.dumps(payload).encode("utf-8")
+        signature = self._sign_payload(body_bytes)
+
+        resp = self.url_open(
+            "/api/v1/travel/referral-created",
+            data=body_bytes,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature-SHA256": signature,
+                "Idempotency-Key": event_id,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data.get("success"))
+        self.assertFalse(data.get("routed_to_sales"))
+        lead_id = data.get("lead_id")
+
+        lead = self.env["crm.lead"].sudo().browse(lead_id)
+        self.assertEqual(lead.type, "lead")
+        self.assertTrue(lead.x_is_referral)
+        self.assertFalse(lead.x_has_contact_info)
+        self.assertFalse(lead.user_id)  # No salesperson assigned
+        self.assertFalse(lead.team_id)  # No sales team assigned
+
+        # Verify Tags: MUST have [PARTNER_REFERRAL] but NOT [WARM_REFERRAL]
+        tag_names = lead.tag_ids.mapped("name")
+        self.assertIn("[PARTNER_REFERRAL]", tag_names)
+        self.assertNotIn("[WARM_REFERRAL]", tag_names)
+        self.assertNotIn("[AI_LEAD]", tag_names)
+
+        # Verify Commission Calculation: 1,000,000 * 5.0% = 50,000 VND
+        self.assertEqual(lead.x_referral_estimated_commission, 50000.0)
+
+    def test_referral_created_invalid_signature_rejected(self):
+        """Invalid HMAC-SHA256 signature on referral endpoint must return HTTP 401."""
+        payload = json.dumps({"test": "bad_referral"}).encode("utf-8")
+        resp = self.url_open(
+            "/api/v1/travel/referral-created",
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature-SHA256": "bad_sig_00000000000000000000000000000000",
+                "Idempotency-Key": str(uuid.uuid4()),
+            },
+        )
+        self.assertEqual(resp.status_code, 401)
+        self.assertEqual(resp.json().get("title"), "Unauthorized")
