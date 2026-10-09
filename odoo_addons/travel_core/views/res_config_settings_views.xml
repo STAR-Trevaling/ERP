@@ -15,6 +15,9 @@
                         <setting id="travel_webhook_secret_setting" help="Secret used to sign outbound webhooks and verify inbound webhooks">
                             <field name="travel_webhook_secret" password="True"/>
                         </setting>
+                        <setting id="travel_webhook_secret_previous_setting" help="Previous secret accepted as fallback during dual-key rotation">
+                            <field name="travel_webhook_secret_previous" password="True"/>
+                        </setting>
                         <setting id="travel_inbound_api_key_setting" help="Bearer token required for incoming inquiries">
                             <field name="travel_api_key" password="True"/>
                         </setting>

@@ -26,11 +26,11 @@
                 <button name="action_open_confirm_wizard" string="Xác nhận tiền"
                         type="object" class="btn-success"
                         invisible="state != 'pending'"
-                        groups="account.group_account_user"/>
+                        groups="star_travels_payment_sync.group_payment_confirmer"/>
                 <button name="action_open_reject_wizard" string="Từ chối"
                         type="object" class="btn-outline-danger"
                         invisible="state != 'pending'"
-                        groups="account.group_account_user"/>
+                        groups="star_travels_payment_sync.group_payment_confirmer"/>
             </list>
         </field>
     </record>
@@ -45,11 +45,11 @@
                     <button name="action_open_confirm_wizard" string="Xác nhận đã nhận tiền"
                             type="object" class="btn-primary"
                             invisible="state != 'pending'"
-                            groups="account.group_account_user"/>
+                            groups="star_travels_payment_sync.group_payment_confirmer"/>
                     <button name="action_open_reject_wizard" string="Từ chối / Không tìm thấy"
                             type="object" class="btn-secondary"
                             invisible="state != 'pending'"
-                            groups="account.group_account_user"/>
+                            groups="star_travels_payment_sync.group_payment_confirmer"/>
                     <field name="state" widget="statusbar" statusbar_visible="pending,confirmed,rejected"/>
                 </header>
                 <sheet>

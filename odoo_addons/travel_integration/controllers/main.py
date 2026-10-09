@@ -17,6 +17,7 @@ class TravelIntegrationController(http.Controller):
         Verify request using either:
         1. Bearer API Key header against config 'travel.inbound_api_key'
         2. HMAC-SHA256 signature in 'X-Signature-SHA256' against config 'travel.webhook_secret'
+           with dual-key rotation fallback to 'travel.webhook_secret_previous'
         """
         auth_header = request.httprequest.headers.get('Authorization', '')
         api_key_header = request.httprequest.headers.get('X-API-Key', '')
@@ -27,6 +28,9 @@ class TravelIntegrationController(http.Controller):
         )
         conf_secret = request.env['ir.config_parameter'].sudo().get_param(
             'travel.webhook_secret', 'star_travels_super_secret_webhook_key_2026'
+        )
+        conf_secret_previous = request.env['ir.config_parameter'].sudo().get_param(
+            'travel.webhook_secret_previous', False
         )
 
         # Check API Key (Bearer or Header)
@@ -41,6 +45,13 @@ class TravelIntegrationController(http.Controller):
             computed_sig = hmac.new(conf_secret.encode('utf-8'), body_bytes, hashlib.sha256).hexdigest()
             if hmac.compare_digest(sig_header, computed_sig):
                 return True
+
+            # Dual-key rotation fallback: Verify against previous secret if configured
+            if conf_secret_previous:
+                computed_prev_sig = hmac.new(conf_secret_previous.encode('utf-8'), body_bytes, hashlib.sha256).hexdigest()
+                if hmac.compare_digest(sig_header, computed_prev_sig):
+                    _logger.info("Inbound webhook authenticated using previous secret (rotation grace window).")
+                    return True
 
         return False
 

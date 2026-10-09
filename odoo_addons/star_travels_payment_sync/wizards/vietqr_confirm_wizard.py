@@ -141,11 +141,10 @@ class StarTravelsVietqrConfirmWizard(models.TransientModel):
         if pending.state != "pending":
             raise UserError(_("Giao dịch này không còn ở trạng thái chờ xác nhận!"))
 
-        # 1. Permission Check
+        # 1. Permission Check - Strict Confirmer Role Enforcement
         confirmer_group = self.env.ref("star_travels_payment_sync.group_payment_confirmer", raise_if_not_found=False)
         has_perm = (
-            self.env.user.has_group("account.group_account_user")
-            or (confirmer_group and self.env.user in confirmer_group.users)
+            (confirmer_group and self.env.user in confirmer_group.users)
             or self.env.user._is_admin()
         )
         if not has_perm:
