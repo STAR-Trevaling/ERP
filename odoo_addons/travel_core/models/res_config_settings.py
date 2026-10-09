@@ -17,6 +17,11 @@ class ResConfigSettings(models.TransientModel):
         default="star_travels_super_secret_webhook_key_2026",
         help="Shared secret key used to compute and verify HMAC-SHA256 signatures",
     )
+    travel_webhook_secret_previous = fields.Char(
+        string="Previous Webhook HMAC Secret Key",
+        config_parameter='travel.webhook_secret_previous',
+        help="Previous secret key accepted as fallback during key rotation grace period",
+    )
     travel_api_key = fields.Char(
         string="Inbound API Key",
         config_parameter='travel.inbound_api_key',

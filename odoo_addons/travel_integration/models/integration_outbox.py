@@ -75,10 +75,18 @@ class TravelIntegrationOutbox(models.Model):
 
         base_url = self.env['ir.config_parameter'].sudo().get_param('travel.public_platform_url', 'http://host.docker.internal:8000').rstrip('/')
         secret = self.env['ir.config_parameter'].sudo().get_param('travel.webhook_secret', 'star_travels_super_secret_webhook_key_2026')
-        endpoint = f"{base_url}/api/v1/integrations/v1/odoo/events"
+        default_endpoint = f"{base_url}/api/v1/integrations/v1/odoo/events"
 
         for rec in pending_records:
-            rec._dispatch_single(endpoint, secret)
+            target_endpoint = default_endpoint
+            try:
+                payload_data = json.loads(rec.payload) if rec.payload else {}
+                custom_path = payload_data.get('endpoint')
+                if custom_path:
+                    target_endpoint = custom_path if custom_path.startswith('http') else f"{base_url}{custom_path}"
+            except Exception:
+                pass
+            rec._dispatch_single(target_endpoint, secret)
 
         return True
 
@@ -148,5 +156,13 @@ class TravelIntegrationOutbox(models.Model):
         for rec in self:
             base_url = self.env['ir.config_parameter'].sudo().get_param('travel.public_platform_url', 'http://localhost:8000').rstrip('/')
             secret = self.env['ir.config_parameter'].sudo().get_param('travel.webhook_secret', 'star_travels_super_secret_webhook_key_2026')
-            endpoint = f"{base_url}/api/integrations/v1/odoo/events"
-            rec._dispatch_single(endpoint, secret)
+            default_endpoint = f"{base_url}/api/v1/integrations/v1/odoo/events"
+            target_endpoint = default_endpoint
+            try:
+                payload_data = json.loads(rec.payload) if rec.payload else {}
+                custom_path = payload_data.get('endpoint')
+                if custom_path:
+                    target_endpoint = custom_path if custom_path.startswith('http') else f"{base_url}{custom_path}"
+            except Exception:
+                pass
+            rec._dispatch_single(target_endpoint, secret)

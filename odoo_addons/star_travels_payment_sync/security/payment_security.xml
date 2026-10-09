@@ -9,12 +9,24 @@
     </record>
 
     <!-- Record Rule: Separation of Duties (SoD) on star.travels.payment.pending -->
-    <!-- Salesperson cannot write/confirm their own pending payment -->
+    <!-- Confirmer has full access to all pending records -->
     <record id="rule_payment_pending_confirmer_all" model="ir.rule">
         <field name="name">STAR Payment Confirmer: View All Pending Payments</field>
         <field name="model_id" ref="model_star_travels_payment_pending"/>
         <field name="groups" eval="[(4, ref('group_payment_confirmer'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!-- SoD: Salespersons cannot write or confirm their own pending payment -->
+    <record id="rule_payment_pending_sod_salesperson" model="ir.rule">
+        <field name="name">STAR Payment SoD: Salesperson cannot modify own orders</field>
+        <field name="model_id" ref="model_star_travels_payment_pending"/>
+        <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        <field name="domain_force">['|', ('user_id', '!=', user.id), ('user_id', '=', False)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
     <!-- Audit Log Rule: Immutable view for all accounting users -->
