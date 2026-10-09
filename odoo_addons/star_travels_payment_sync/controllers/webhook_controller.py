@@ -17,6 +17,7 @@ class StarTravelsPaymentWebhookController(http.Controller):
         Verify incoming request authentication against ir.config_parameter:
         1. Bearer API Key in Authorization header or X-API-Key against 'travel.inbound_api_key'
         2. HMAC-SHA256 signature in 'X-Signature-SHA256' against 'travel.webhook_secret'
+           with dual-key rotation fallback to 'travel.webhook_secret_previous'
         Identical security handshake as travel_integration module.
         """
         auth_header = request.httprequest.headers.get("Authorization", "")
@@ -33,6 +34,11 @@ class StarTravelsPaymentWebhookController(http.Controller):
             .sudo()
             .get_param("travel.webhook_secret", "star_travels_super_secret_webhook_key_2026")
         )
+        conf_secret_previous = (
+            request.env["ir.config_parameter"]
+            .sudo()
+            .get_param("travel.webhook_secret_previous", False)
+        )
 
         # 1. Check Bearer / X-API-Key
         token = auth_header.replace("Bearer ", "").strip() if auth_header.startswith("Bearer ") else api_key_header
@@ -46,6 +52,13 @@ class StarTravelsPaymentWebhookController(http.Controller):
             computed_sig = hmac.new(conf_secret.encode("utf-8"), body_bytes, hashlib.sha256).hexdigest()
             if hmac.compare_digest(sig_header, computed_sig):
                 return True
+
+            # 3. Dual-key rotation fallback: Verify against previous secret if configured
+            if conf_secret_previous:
+                computed_prev_sig = hmac.new(conf_secret_previous.encode("utf-8"), body_bytes, hashlib.sha256).hexdigest()
+                if hmac.compare_digest(sig_header, computed_prev_sig):
+                    _logger.info("Webhook authenticated successfully using previous secret (rotation grace window).")
+                    return True
 
         return False
 
@@ -281,6 +294,7 @@ class StarTravelsPaymentWebhookController(http.Controller):
                 sale_order = env["sale.order"].create(so_vals)
 
                 # c. Create Order Lines
+                total_lines_amount = 0.0
                 if items_data:
                     for item in items_data:
                         product = self._get_or_create_service_product(env, item, company)
@@ -293,6 +307,7 @@ class StarTravelsPaymentWebhookController(http.Controller):
 
                         if adults > 0 or children > 0:
                             if adults > 0:
+                                total_lines_amount += (adults * price_adult)
                                 env["sale.order.line"].create({
                                     "order_id": sale_order.id,
                                     "product_id": product.id,
@@ -302,6 +317,7 @@ class StarTravelsPaymentWebhookController(http.Controller):
                                     "analytic_distribution": analytic_dist,
                                 })
                             if children > 0:
+                                total_lines_amount += (children * price_child)
                                 env["sale.order.line"].create({
                                     "order_id": sale_order.id,
                                     "product_id": product.id,
@@ -313,6 +329,7 @@ class StarTravelsPaymentWebhookController(http.Controller):
                         else:
                             qty = float(item.get("quantity") or 1.0)
                             unit_price = float(item.get("price") or item.get("price_unit") or total_amount)
+                            total_lines_amount += (qty * unit_price)
                             env["sale.order.line"].create({
                                 "order_id": sale_order.id,
                                 "product_id": product.id,
@@ -321,6 +338,57 @@ class StarTravelsPaymentWebhookController(http.Controller):
                                 "price_unit": unit_price,
                                 "analytic_distribution": analytic_dist,
                             })
+
+                    # RỦI RO KẾ TOÁN VAS: Tự động cân đối chênh lệch giữa tổng dòng và số tiền thực trả
+                    # Ví dụ: Coupon giảm giá, chiết khấu khuyến mãi từ Django backend
+                    if total_amount > 0:
+                        discrepancy = round(total_amount - total_lines_amount, 2)
+                        if abs(discrepancy) > 0.01:
+                            if discrepancy < 0:
+                                # Khách trả ít hơn tổng dòng niêm yết -> Chiết khấu khuyến mãi / Voucher
+                                discount_val = abs(discrepancy)
+                                _logger.warning(
+                                    "Booking %s: Order lines total (%s) exceeds paid amount (%s). "
+                                    "Adding promotional discount line (-%s) for accurate settlement and VAS reconciliation.",
+                                    booking_code, total_lines_amount, total_amount, discount_val
+                                )
+                                disc_product = env["product.product"].search([("default_code", "=", "DISCOUNT-PROMO")], limit=1)
+                                if not disc_product:
+                                    disc_product = env["product.product"].create({
+                                        "name": "Chiết khấu / Giảm giá khuyến mãi",
+                                        "default_code": "DISCOUNT-PROMO",
+                                        "type": "service",
+                                        "invoice_policy": "order",
+                                    })
+                                env["sale.order.line"].create({
+                                    "order_id": sale_order.id,
+                                    "product_id": disc_product.id,
+                                    "name": f"Chiết khấu khuyến mãi booking {booking_code}",
+                                    "product_uom_qty": 1.0,
+                                    "price_unit": -discount_val,
+                                })
+                            else:
+                                # Khách trả nhiều hơn -> Phụ phí phát sinh
+                                _logger.info(
+                                    "Booking %s: Paid amount (%s) exceeds base lines (%s). "
+                                    "Adding surcharge line (+%s).",
+                                    booking_code, total_amount, total_lines_amount, discrepancy
+                                )
+                                surcharge_product = env["product.product"].search([("default_code", "=", "SURCHARGE-MISC")], limit=1)
+                                if not surcharge_product:
+                                    surcharge_product = env["product.product"].create({
+                                        "name": "Phụ phí / Dịch vụ gia tăng",
+                                        "default_code": "SURCHARGE-MISC",
+                                        "type": "service",
+                                        "invoice_policy": "order",
+                                    })
+                                env["sale.order.line"].create({
+                                    "order_id": sale_order.id,
+                                    "product_id": surcharge_product.id,
+                                    "name": f"Phụ phí phát sinh booking {booking_code}",
+                                    "product_uom_qty": 1.0,
+                                    "price_unit": discrepancy,
+                                })
                 else:
                     # Single service fallback line matching total paid amount
                     fallback_item = {"title": f"Tour Booking {booking_code}", "price": total_amount}
@@ -766,6 +834,110 @@ class StarTravelsPaymentWebhookController(http.Controller):
             _logger.exception("Error processing payment-pending webhook for event %s: %s", idempotency_key, str(e))
             return self._problem_response(
                 title="Payment Pending Registration Error",
+                detail=str(e),
+                status=500,
+                error_code="PROCESSING_ERROR",
+            )
+
+    @http.route(
+        "/api/v1/travel/referral-created",
+        type="http",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        readonly=False,
+    )
+    def handle_referral_created(self, **kwargs):
+        """
+        Inbound webhook receiver when a customer clicks a partner referral link on STAR Travels.
+        Creates a CRM lead for partner tracking and commission analytics:
+        - type='lead' (NO sale.order / invoice / payment created!).
+        - Tagged with [PARTNER_REFERRAL].
+        - If has_contact_info is True: Tagged [WARM_REFERRAL] and routed to Sales pipeline.
+        - If has_contact_info is False: Stored for click analytics only (no Salesperson assigned).
+        """
+        if not self._verify_auth():
+            _logger.warning("Unauthorized access attempt to /api/v1/travel/referral-created")
+            return self._problem_response(
+                title="Unauthorized",
+                detail="Missing or invalid authentication token / HMAC signature.",
+                status=401,
+                error_code="UNAUTHORIZED",
+            )
+
+        try:
+            raw_data = request.httprequest.get_data(as_text=True)
+            payload = json.loads(raw_data) if raw_data else {}
+        except json.JSONDecodeError:
+            return self._problem_response(
+                title="Invalid JSON",
+                detail="Request body must be valid JSON.",
+                status=400,
+                error_code="BAD_REQUEST",
+            )
+
+        idempotency_key = self._extract_idempotency_key(payload)
+        if not idempotency_key:
+            return self._problem_response(
+                title="Missing Idempotency Key",
+                detail="Header 'Idempotency-Key' or payload 'event_id' is required.",
+                status=400,
+                error_code="MISSING_IDEMPOTENCY_KEY",
+            )
+
+        env = request.env(user=SUPERUSER_ID)
+
+        # 1. Idempotency Check
+        existing_log = env["star.travels.webhook.log"].search([
+            ("event_id", "=", str(idempotency_key)),
+        ], limit=1)
+
+        if existing_log and existing_log.state == "success" and existing_log.result_summary:
+            _logger.info("Idempotent replay detected for referral event %s", idempotency_key)
+            try:
+                cached_data = json.loads(existing_log.result_summary)
+                return self._json_response(cached_data, status=200)
+            except Exception:
+                pass
+
+        try:
+            with env.cr.savepoint():
+                lead = env["crm.lead"].create_from_referral_payload(payload)
+
+                result_data = {
+                    "success": True,
+                    "lead_id": lead.id,
+                    "lead_name": lead.name,
+                    "type": lead.type,
+                    "has_contact_info": lead.x_has_contact_info,
+                    "partner_name": lead.x_referral_partner_name,
+                    "routed_to_sales": bool(lead.team_id or lead.user_id),
+                    "commission_rate": lead.x_referral_commission_rate,
+                    "estimated_commission": lead.x_referral_estimated_commission,
+                    "message": "Referral lead registered successfully for partner tracking.",
+                }
+
+                # Record Idempotency Log
+                env["star.travels.webhook.log"].create({
+                    "event_id": str(idempotency_key),
+                    "event_type": "referral.created",
+                    "payload": raw_data,
+                    "state": "success",
+                    "result_summary": json.dumps(result_data),
+                    "res_model": "crm.lead",
+                    "res_id": lead.id,
+                })
+
+                _logger.info(
+                    "Processed referral.created webhook: Lead #%d (%s), Routed to Sales: %s",
+                    lead.id, lead.name, bool(lead.team_id or lead.user_id)
+                )
+                return self._json_response(result_data, status=200)
+
+        except Exception as e:
+            _logger.exception("Error processing referral-created webhook for event %s: %s", idempotency_key, str(e))
+            return self._problem_response(
+                title="Referral Processing Error",
                 detail=str(e),
                 status=500,
                 error_code="PROCESSING_ERROR",

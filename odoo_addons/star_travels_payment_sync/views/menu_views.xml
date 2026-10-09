@@ -61,4 +61,11 @@
               parent="menu_star_travels_payment_root"
               action="action_star_travels_webhook_log"
               sequence="45"/>
+
+    <!-- Submenu 6: Partner Referral & Commission Reporting -->
+    <menuitem id="menu_star_travels_referral_reporting"
+              name="Báo Cáo Referral Đối Tác"
+              parent="menu_star_travels_payment_root"
+              action="action_star_travels_referral_reporting"
+              sequence="55"/>
 </odoo>

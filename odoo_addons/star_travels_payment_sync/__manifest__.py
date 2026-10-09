@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Star Travels - Payment & Reconciliation Sync",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "category": "Accounting/Travel",
-    "summary": "Automated booking payment & refund webhook sync, VietQR manual confirmation with append-only audit trail, and VNPay reconciliation",
+    "summary": "Automated booking payment & refund webhook sync, VietQR confirmation, and partner referral lead tracking",
     "description": """
 Star Travels Payment & Reconciliation Sync
 ==========================================
+- Partner Referral tracking & commission dashboard:
+  * POST /api/v1/travel/referral-created (CRM lead with [PARTNER_REFERRAL] / [WARM_REFERRAL] tags).
+  * Partner referral and commission analytics dashboard.
 - Inbound Webhook controller for payment and refund events:
   * POST /api/v1/travel/booking-paid
   * POST /api/v1/travel/booking-refunded
@@ -46,9 +49,11 @@ Star Travels Payment & Reconciliation Sync
         "mail",
         "sale",
         "account",
+        "crm",
         "travel_core",
         "travel_integration",
         "travel_cms",
+        "travel_crm",
     ],
     "data": [
         "security/payment_security.xml",
@@ -61,6 +66,7 @@ Star Travels Payment & Reconciliation Sync
         "views/payment_audit_log_views.xml",
         "views/vietqr_confirm_wizard_views.xml",
         "views/vietqr_reject_wizard_views.xml",
+        "views/referral_reporting_views.xml",
         "views/menu_views.xml",
     ],
     "installable": True,

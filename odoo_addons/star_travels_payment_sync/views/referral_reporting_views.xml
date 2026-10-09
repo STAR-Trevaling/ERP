@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Referral Leads List View -->
+    <record id="view_star_travels_referral_lead_tree" model="ir.ui.view">
+        <field name="name">star.travels.referral.lead.list</field>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <list string="Báo Cáo Referral Đối Tác (Khách Sạn &amp; Nhà Hàng)"
+                  decoration-info="x_has_contact_info"
+                  decoration-muted="not x_has_contact_info"
+                  create="false">
+                <field name="create_date" string="Thời Điểm Click"/>
+                <field name="x_referral_partner_name" string="Đối Tác (Partner)"/>
+                <field name="x_referral_item_name" string="Tên Dịch Vụ / Khách Sạn"/>
+                <field name="x_referral_item_type" widget="badge"/>
+                <field name="x_referral_destination" string="Điểm Đến"/>
+                <field name="contact_name" string="Khách Hàng" optional="show"/>
+                <field name="phone" string="Số Điện Thoại" optional="show"/>
+                <field name="email_from" string="Email" optional="hide"/>
+                <field name="x_has_contact_info" string="Warm Lead" widget="boolean_toggle"/>
+                <field name="team_id" string="Đội Sales Phụ Trách" optional="show"/>
+                <field name="user_id" string="Salesperson" optional="show"/>
+                <field name="x_referral_commission_rate" string="Tỷ Lệ HH (%)" widget="percentage" optional="show"/>
+                <field name="x_referral_estimated_value" string="Giá Trị Ước Tính" widget="monetary" optional="hide"/>
+                <field name="x_referral_estimated_commission" string="Hoa Hồng Ước Tính" widget="monetary" sum="Tổng Hoa Hồng Tiềm Năng"/>
+                <field name="company_currency" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Referral Leads Form View -->
+    <record id="view_star_travels_referral_lead_form" model="ir.ui.view">
+        <field name="name">star.travels.referral.lead.form</field>
+        <field name="model">crm.lead</field>
+        <field name="priority" eval="50"/>
+        <field name="arch" type="xml">
+            <form string="Chi Tiết Giới Thiệu Đối Tác">
+                <sheet>
+                    <!-- Mandatory Accounting & Internal Audit Disclaimer Banner -->
+                    <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                        <i class="fa fa-info-circle fa-2x me-3 text-info" title="Disclaimer"></i>
+                        <div>
+                            <strong>Lưu ý Đối Soát Hoa Hồng Đối Tác (Internal Reference Only):</strong>
+                            <p class="mb-0">
+                                Số liệu hoa hồng hiển thị là <em>ước tính dựa trên lượt click chuyển tiếp, chưa xác nhận chuyển đổi và thanh toán thực tế bên đối tác</em>. Số liệu này phục vụ theo dõi hiệu quả liên kết nội bộ, không dùng làm căn cứ hạch toán doanh thu kế toán chính thức.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Thông Tin Đối Tác &amp; Dịch Vụ">
+                            <field name="x_referral_partner_name" readonly="1"/>
+                            <field name="x_referral_item_name" readonly="1"/>
+                            <field name="x_referral_item_type" readonly="1"/>
+                            <field name="x_referral_destination" readonly="1"/>
+                            <field name="x_referral_booking_id" readonly="1"/>
+                            <field name="create_date" string="Thời điểm chuyển hướng" readonly="1"/>
+                        </group>
+                        <group string="Ước Tính Hoa Hồng (Click-based)">
+                            <field name="x_referral_commission_rate" readonly="1"/>
+                            <field name="x_referral_estimated_value" readonly="1"/>
+                            <field name="x_referral_estimated_commission" readonly="1"/>
+                            <field name="company_currency" invisible="1"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        </group>
+                    </group>
+
+                    <group string="Phân Luồng Chăm Sóc Khách Hàng (Sales Pipeline)">
+                        <group>
+                            <field name="x_has_contact_info" readonly="1"/>
+                            <field name="contact_name" readonly="1"/>
+                            <field name="phone" widget="phone" readonly="1"/>
+                            <field name="email_from" widget="email" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="team_id" readonly="not x_has_contact_info"/>
+                            <field name="user_id" readonly="not x_has_contact_info"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Mô Tả &amp; Nhật Ký Hệ Thống">
+                            <field name="description" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Referral Pivot / Matrix Dashboard View -->
+    <record id="view_star_travels_referral_lead_pivot" model="ir.ui.view">
+        <field name="name">star.travels.referral.lead.pivot</field>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <pivot string="Phân Tích Hoa Hồng &amp; Lượt Giới Thiệu Đối Tác" sample="1">
+                <field name="x_referral_partner_name" type="row"/>
+                <field name="create_date" interval="month" type="col"/>
+                <field name="x_referral_item_type" type="row"/>
+                <field name="x_referral_estimated_commission" type="measure"/>
+                <field name="x_referral_estimated_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Referral Graph / Chart Dashboard View -->
+    <record id="view_star_travels_referral_lead_graph" model="ir.ui.view">
+        <field name="name">star.travels.referral.lead.graph</field>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <graph string="Biểu Đồ Lượt Referral Theo Đối Tác" type="bar" sample="1">
+                <field name="x_referral_partner_name"/>
+                <field name="x_referral_estimated_commission" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Referral Leads Search View -->
+    <record id="view_star_travels_referral_lead_search" model="ir.ui.view">
+        <field name="name">star.travels.referral.lead.search</field>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm Referral Đối tác">
+                <field name="name" string="Mã / Tên"/>
+                <field name="x_referral_partner_name" string="Đối tác"/>
+                <field name="x_referral_item_name" string="Khách sạn / Nhà hàng"/>
+                <field name="contact_name" string="Khách hàng"/>
+                <field name="phone" string="Số điện thoại"/>
+                <field name="x_referral_destination" string="Điểm đến"/>
+
+                <filter string="Chỉ Lượt Referral" name="filter_referrals" domain="[('x_is_referral', '=', True)]"/>
+                <separator/>
+                <filter string="Warm Lead (Có liên hệ)" name="filter_warm" domain="[('x_has_contact_info', '=', True)]"/>
+                <filter string="Chỉ Click Thống Kê (Không liên hệ)" name="filter_click_only" domain="[('x_has_contact_info', '=', False)]"/>
+                <separator/>
+                <filter string="Tháng Này" name="filter_this_month"
+                        domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+                <group expand="0" string="Nhóm theo">
+                    <filter string="Đối tác (Partner)" name="group_partner" context="{'group_by': 'x_referral_partner_name'}"/>
+                    <filter string="Loại dịch vụ" name="group_item_type" context="{'group_by': 'x_referral_item_type'}"/>
+                    <filter string="Điểm đến (Destination)" name="group_destination" context="{'group_by': 'x_referral_destination'}"/>
+                    <filter string="Tháng (Click Date)" name="group_date" context="{'group_by': 'create_date:month'}"/>
+                    <filter string="Có thông tin khách" name="group_has_contact" context="{'group_by': 'x_has_contact_info'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action Window for Referral Dashboard -->
+    <record id="action_star_travels_referral_reporting" model="ir.actions.act_window">
+        <field name="name">Báo Cáo Đối Soát Hoa Hồng Đối Tác</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('x_is_referral', '=', True)]</field>
+        <field name="context">{'search_default_filter_referrals': 1, 'search_default_group_partner': 1}</field>
+        <field name="search_view_id" ref="view_star_travels_referral_lead_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có dữ liệu referral đối tác nào!
+            </p>
+            <p>
+                Dữ liệu sẽ tự động đồng bộ khi khách hàng click chuyển tiếp sang đối tác khách sạn / nhà hàng (Booking.com, Agoda...) trên hệ thống STAR Travels.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_star_travels_referral_reporting_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_star_travels_referral_lead_tree"/>
+        <field name="act_window_id" ref="action_star_travels_referral_reporting"/>
+    </record>
+
+    <record id="action_star_travels_referral_reporting_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_star_travels_referral_lead_pivot"/>
+        <field name="act_window_id" ref="action_star_travels_referral_reporting"/>
+    </record>
+
+    <record id="action_star_travels_referral_reporting_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_star_travels_referral_lead_graph"/>
+        <field name="act_window_id" ref="action_star_travels_referral_reporting"/>
+    </record>
+
+    <record id="action_star_travels_referral_reporting_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_star_travels_referral_lead_form"/>
+        <field name="act_window_id" ref="action_star_travels_referral_reporting"/>
+    </record>
+</odoo>
