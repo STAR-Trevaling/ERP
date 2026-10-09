@@ -10,7 +10,7 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                 </header>
                 <sheet>
-                    <div class="alert alert-info" role="alert" invisible="state != 'draft'">
+                    <div class="alert alert-info" role="status" invisible="state != 'draft'">
                         <h5 class="alert-heading mb-1">Hướng dẫn đối soát:</h5>
                         <p class="mb-0">
                             Tải file bảng kê giao dịch (.CSV) từ cổng quản trị đối tác (VNPay Merchant Portal, MoMo Business, ZaloPay), 

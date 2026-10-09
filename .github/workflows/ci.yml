@@ -92,7 +92,7 @@ jobs:
       - name: Run Odoo Native Tests (HttpCase & TransactionCase)
         run: |
           set -o pipefail
-          docker compose run --rm odoo odoo -d odoo_ci_test --db-filter=.* \
+          docker compose run --rm odoo odoo -d odoo_ci_test --db-filter=^odoo_ci_test$ \
             -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --test-enable \
@@ -153,7 +153,7 @@ jobs:
           done
 
           # Initialize database schema and modules
-          docker compose run --rm odoo odoo -d odoo_travel --db-filter=.* \
+          docker compose run --rm odoo odoo -d odoo_travel --db-filter=^odoo_travel$ \
             -i base,mail,contacts,crm,sale,account,travel_core,travel_cms,travel_crm,travel_partner,travel_integration,star_travels_payment_sync \
             --without-demo=all \
             --stop-after-init 2>&1 | tee odoo_init.log

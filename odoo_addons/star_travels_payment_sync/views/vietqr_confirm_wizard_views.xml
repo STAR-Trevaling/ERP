@@ -7,7 +7,7 @@
             <form string="Xác Nhận Tiền Chuyển Khoản VietQR">
                 <sheet>
                     <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <i class="fa fa-exclamation-triangle fa-2x me-3"></i>
+                        <i class="fa fa-exclamation-triangle fa-2x me-3" title="Warning"></i>
                         <div>
                             <strong>Lưu ý kiểm soát nội bộ &amp; Kiểm toán:</strong>
                             <p class="mb-0">

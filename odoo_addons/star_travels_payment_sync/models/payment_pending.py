@@ -82,6 +82,7 @@ class StarTravelsPaymentPending(models.Model):
     wait_hours = fields.Float(
         string="Thời gian chờ (Giờ)",
         compute="_compute_wait_hours",
+        search="_search_wait_hours",
         help="Số giờ giao dịch đang ở trạng thái pending chờ xác nhận",
     )
 
@@ -151,6 +152,17 @@ class StarTravelsPaymentPending(models.Model):
                 rec.wait_hours = round(delta.total_seconds() / 3600.0, 1)
             else:
                 rec.wait_hours = 0.0
+
+    def _search_wait_hours(self, operator, value):
+        now = fields.Datetime.now()
+        target_time = now - timedelta(hours=value or 0.0)
+        if operator in (">=", ">"):
+            return [("created_at", "<=", target_time)]
+        elif operator in ("<=", "<"):
+            return [("created_at", ">=", target_time)]
+        elif operator in ("=", "=="):
+            return [("created_at", "=", target_time)]
+        return []
 
     def action_open_confirm_wizard(self):
         """Opens the confirmation wizard with prefilled payment information."""

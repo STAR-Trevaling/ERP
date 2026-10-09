@@ -45,7 +45,7 @@
                 </header>
                 <sheet>
                     <div class="alert alert-info d-flex align-items-center" role="alert">
-                        <i class="fa fa-lock fa-2x me-3"></i>
+                        <i class="fa fa-lock fa-2x me-3" title="Audit Lock"></i>
                         <div>
                             <strong>Bản ghi kiểm toán bất biến (Append-Only Audit Log)</strong>
                             <p class="mb-0">Dữ liệu được bảo vệ nghiêm ngặt, không thể chỉnh sửa hoặc xóa bỏ.</p>
