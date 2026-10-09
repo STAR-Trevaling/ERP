@@ -43,6 +43,7 @@ Star Travels Payment & Reconciliation Sync
     "license": "LGPL-3",
     "depends": [
         "base",
+        "mail",
         "sale",
         "account",
         "travel_core",
@@ -52,7 +53,6 @@ Star Travels Payment & Reconciliation Sync
     "data": [
         "security/payment_security.xml",
         "security/ir.model.access.csv",
-        "data/account_journal_data.xml",
         "data/ir_cron_data.xml",
         "views/account_payment_views.xml",
         "views/webhook_log_views.xml",

@@ -102,13 +102,12 @@ jobs:
       - name: Print Odoo Test Failure Logs
         if: failure()
         run: |
-          echo "### Odoo Test Failure Summary" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -n 120 odoo_tests.log >> $GITHUB_STEP_SUMMARY || true
-          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "==================== ODOO TEST LOG SUMMARY ===================="
           tail -n 120 odoo_tests.log || true
           echo "================================================================"
+          grep -E "ERROR|CRITICAL|Traceback|Exception|Failed|FAILED" odoo_tests.log | tail -n 25 | while read -r line; do
+            echo "::error title=OdooTestError::$line"
+          done
 
       - name: Upload Odoo Test Logs
         if: always()
@@ -162,11 +161,12 @@ jobs:
       - name: Print Database Initialization Failure Logs
         if: failure()
         run: |
-          echo "### Odoo Database Init Failure Log" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -n 120 odoo_init.log >> $GITHUB_STEP_SUMMARY || true
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "==================== ODOO INIT LOG SUMMARY ===================="
           tail -n 120 odoo_init.log || true
+          echo "================================================================"
+          grep -E "ERROR|CRITICAL|Traceback|Exception|Failed|FAILED" odoo_init.log | tail -n 25 | while read -r line; do
+            echo "::error title=OdooInitError::$line"
+          done
 
       - name: Start Odoo Web Server Daemon
         run: |
