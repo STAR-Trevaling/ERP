@@ -80,3 +80,59 @@ class TestTravelCRM(TransactionCase):
         self.assertEqual(lead.destination_interest_id, self.destination)
         self.assertEqual(lead.traveler_count, 4)
         self.assertEqual(lead.external_lead_id, 'fb_msg_10928374')
+
+    def test_create_from_inquiry_with_marketing_utm_attribution(self):
+        """Test inquiry creation with full marketing UTM parameters and ad click IDs."""
+        payload = {
+            'source': 'website',
+            'inquiry_type': 'consultation',
+            'message': 'Can you advice tour to Da Lat?',
+            'customer': {
+                'name': 'Pham Thi D',
+                'phone': '0901234567',
+                'email': 'd.pham@travel.vn',
+            },
+            'interest': {
+                'destination_slug': 'test-da-lat',
+            },
+            'marketing': {
+                'channel': 'website',
+                'utm_source': 'google_ads',
+                'utm_medium': 'cpc',
+                'utm_campaign': 'autumn_promotion_2026',
+                'utm_term': 'du lich da lat 3 ngay 2 dem',
+                'utm_content': 'search_ad_v2',
+                'gclid': 'Cj0KCQjwx_test_gclid_123',
+                'fbclid': 'IwAR3_test_fbclid_456',
+                'landing_page': 'https://startravels.vn/destinations/da-lat',
+                'referrer': 'https://www.google.com.vn/',
+            },
+        }
+
+        lead = self.lead_model.create_from_inquiry_payload(payload)
+
+        self.assertTrue(lead)
+        self.assertEqual(lead.source_id.name.lower(), 'google_ads')
+        self.assertEqual(lead.medium_id.name.lower(), 'cpc')
+        self.assertEqual(lead.campaign_id.name.lower(), 'autumn_promotion_2026')
+        self.assertEqual(lead.utm_term, 'du lich da lat 3 ngay 2 dem')
+        self.assertEqual(lead.utm_content, 'search_ad_v2')
+        self.assertEqual(lead.gclid, 'Cj0KCQjwx_test_gclid_123')
+        self.assertEqual(lead.fbclid, 'IwAR3_test_fbclid_456')
+        self.assertEqual(lead.landing_page_url, 'https://startravels.vn/destinations/da-lat')
+        self.assertEqual(lead.referrer_url, 'https://www.google.com.vn/')
+
+    def test_utm_auto_discovery_deduplicates_existing_records(self):
+        """Test case-insensitive UTM auto-discovery reuses existing record without duplication."""
+        existing_campaign = self.env['utm.campaign'].create({'name': 'Winter_Wonderland_2026'})
+
+        payload = {
+            'customer': {'name': 'Vu Van E', 'phone': '0977112233'},
+            'marketing': {
+                'utm_campaign': 'winter_wonderland_2026',  # lowercase variation
+                'utm_source': 'facebook_ads',
+            },
+        }
+
+        lead = self.lead_model.create_from_inquiry_payload(payload)
+        self.assertEqual(lead.campaign_id.id, existing_campaign.id, "Must match existing campaign ignoring case")

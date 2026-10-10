@@ -21,6 +21,21 @@
                         <field name="external_lead_id" readonly="1"/>
                     </group>
                 </group>
+                <group string="Marketing &amp; Attribution" name="marketing_attribution">
+                    <group string="UTM Campaign Tracking">
+                        <field name="campaign_id"/>
+                        <field name="source_id"/>
+                        <field name="medium_id"/>
+                        <field name="utm_term"/>
+                        <field name="utm_content"/>
+                    </group>
+                    <group string="Conversion &amp; Click IDs">
+                        <field name="gclid" readonly="1"/>
+                        <field name="fbclid" readonly="1"/>
+                        <field name="landing_page_url" widget="url" readonly="1"/>
+                        <field name="referrer_url" widget="url" readonly="1"/>
+                    </group>
+                </group>
             </xpath>
         </field>
     </record>
@@ -35,6 +50,9 @@
                 <field name="source_system" widget="badge" optional="show"/>
                 <field name="inquiry_type" optional="show"/>
                 <field name="destination_interest_id" optional="show"/>
+                <field name="campaign_id" optional="hide"/>
+                <field name="source_id" optional="hide"/>
+                <field name="medium_id" optional="hide"/>
             </xpath>
         </field>
     </record>
@@ -74,6 +92,9 @@
                 <filter string="Source Channel" name="groupby_source_system" context="{'group_by': 'source_system'}"/>
                 <filter string="Destination" name="groupby_destination" context="{'group_by': 'destination_interest_id'}"/>
                 <filter string="Inquiry Type" name="groupby_inquiry_type" context="{'group_by': 'inquiry_type'}"/>
+                <filter string="Campaign" name="groupby_campaign" context="{'group_by': 'campaign_id'}"/>
+                <filter string="Medium" name="groupby_medium" context="{'group_by': 'medium_id'}"/>
+                <filter string="Source" name="groupby_source" context="{'group_by': 'source_id'}"/>
             </xpath>
         </field>
     </record>

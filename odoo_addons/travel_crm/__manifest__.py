@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Star Travels - CRM & Inquiries",
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.1.0',
     'category': 'Travel/CRM',
-    'summary': "Multi-channel Travel Inquiry, Customer Deduplication & Lead Lifecycle for Star Travels",
+    'summary': "Multi-channel Travel Inquiry, Marketing UTM Attribution & Customer Deduplication for Star Travels",
     'description': """
 Star Travels CRM & Inquiry Management
 =====================================
-- Extends standard Odoo CRM (crm.lead, res.partner, utm.source).
+- Extends standard Odoo CRM (crm.lead, res.partner, utm.source, utm.medium, utm.campaign).
 - Multi-channel source attribution: Website, Facebook, Zalo, Pancake, OTA, AI Assistant.
+- Marketing UTM Attribution synchronization (utm_source, utm_medium, utm_campaign, utm_term, utm_content).
+- Conversion and Ad Click ID tracking (gclid, fbclid, landing_page, referrer).
 - Smart Customer Deduplication (Phone, Email, Public UUID).
 - Inquiries linked directly to Destinations and Places of interest.
     """,

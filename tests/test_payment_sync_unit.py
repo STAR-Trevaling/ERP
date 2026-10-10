@@ -464,4 +464,137 @@ VNP_1003,300000000,TCB
         # Zero commission rate
         assert compute_commission(2000000.0, 0.0) == 0.0
 
+    def test_marketing_utm_extraction_full_payload(self):
+        """Extracts complete UTM parameters, click IDs, and landing/referrer URLs from marketing block."""
+        from odoo_addons.travel_crm.models.crm_lead import extract_marketing_attribution
+
+        payload = {
+            "customer": {"name": "Test Traveler"},
+            "inquiry_type": "tour_booking",
+            "marketing": {
+                "channel": "website",
+                "utm_source": "google_ads",
+                "utm_medium": "cpc",
+                "utm_campaign": "autumn_promotion_2026",
+                "utm_content": "hero_banner_variant_b",
+                "utm_term": "tour du lich ha long 3n2d",
+                "gclid": "Cj0KCQjwx_XnBRDbARIsAPmRR1b_sample_gclid_12345",
+                "fbclid": "IwAR3_sample_fbclid_67890",
+                "landing_page": "https://startravels.vn/tours/ha-long-cruise?utm_source=google_ads",
+                "referrer": "https://www.google.com.vn/",
+            },
+        }
+
+        attr = extract_marketing_attribution(payload)
+        assert attr["channel"] == "website"
+        assert attr["utm_source"] == "google_ads"
+        assert attr["utm_medium"] == "cpc"
+        assert attr["utm_campaign"] == "autumn_promotion_2026"
+        assert attr["utm_content"] == "hero_banner_variant_b"
+        assert attr["utm_term"] == "tour du lich ha long 3n2d"
+        assert attr["gclid"] == "Cj0KCQjwx_XnBRDbARIsAPmRR1b_sample_gclid_12345"
+        assert attr["fbclid"] == "IwAR3_sample_fbclid_67890"
+        assert attr["landing_page"] == "https://startravels.vn/tours/ha-long-cruise?utm_source=google_ads"
+        assert attr["referrer"] == "https://www.google.com.vn/"
+
+    def test_marketing_utm_fallback_precedence(self):
+        """Precedence order: marketing > source_metadata > utm > root fields."""
+        from odoo_addons.travel_crm.models.crm_lead import extract_marketing_attribution
+
+        # Case 1: marketing block takes precedence over source_metadata
+        payload_mixed = {
+            "marketing": {
+                "utm_source": "marketing_source",
+                "utm_campaign": "marketing_campaign",
+            },
+            "source_metadata": {
+                "utm_source": "meta_source",
+                "utm_campaign": "meta_campaign",
+                "utm_medium": "meta_medium",
+            },
+        }
+        attr = extract_marketing_attribution(payload_mixed)
+        assert attr["utm_source"] == "marketing_source"
+        assert attr["utm_campaign"] == "marketing_campaign"
+        assert attr["utm_medium"] == "meta_medium"
+
+        # Case 2: source_metadata fallback when marketing is empty
+        payload_meta_only = {
+            "source_metadata": {
+                "channel": "facebook",
+                "utm_source": "fb_ads",
+                "utm_medium": "paid_social",
+                "campaign": "tet_holiday_2027",
+                "gclid": "gclid_from_meta",
+            },
+        }
+        attr2 = extract_marketing_attribution(payload_meta_only)
+        assert attr2["channel"] == "facebook"
+        assert attr2["utm_source"] == "fb_ads"
+        assert attr2["utm_medium"] == "paid_social"
+        assert attr2["utm_campaign"] == "tet_holiday_2027"
+        assert attr2["gclid"] == "gclid_from_meta"
+
+        # Case 3: Complete fallback to legacy root source when no marketing block provided
+        payload_legacy = {
+            "source": "zalo",
+            "message": "Xin chao",
+        }
+        attr3 = extract_marketing_attribution(payload_legacy)
+        assert attr3["channel"] == "zalo"
+        assert attr3["utm_source"] == "zalo"
+        assert attr3["utm_medium"] is None
+        assert attr3["utm_campaign"] is None
+        assert attr3["gclid"] is None
+
+    def test_utm_record_case_insensitive_lookup_and_creation(self):
+        """Auto-discovery resolves existing UTM records ignoring case, creates new if absent."""
+        from odoo_addons.travel_crm.models.crm_lead import resolve_utm_model_record
+
+        existing_sources = {1: "Google_Ads", 2: "Facebook", 3: "Direct"}
+
+        class MockUtmModel:
+            def __init__(self, data):
+                self.records = dict(data)
+
+            def search(self, domain, limit=1):
+                field, op, val = domain[0]
+                if op == "=ilike":
+                    for rid, rname in self.records.items():
+                        if rname.lower() == val.lower():
+                            return MockRecord(rid, rname)
+                return MockRecord(None, None)
+
+            def create(self, vals):
+                new_id = max(self.records.keys(), default=0) + 1
+                self.records[new_id] = vals["name"]
+                return MockRecord(new_id, vals["name"])
+
+        class MockRecord:
+            def __init__(self, id, name):
+                self.id = id
+                self.name = name
+
+            def __bool__(self):
+                return self.id is not None
+
+        mock_utm_source = MockUtmModel(existing_sources)
+
+        # 1. Existing with different casing ('google_ads' vs 'Google_Ads')
+        id1 = resolve_utm_model_record(mock_utm_source, "google_ads")
+        assert id1 == 1
+
+        # 2. Existing with whitespace
+        id2 = resolve_utm_model_record(mock_utm_source, "  FACEBOOK  ")
+        assert id2 == 2
+
+        # 3. New record ('tiktok_ads') -> created with id 4
+        id3 = resolve_utm_model_record(mock_utm_source, "tiktok_ads")
+        assert id3 == 4
+        assert mock_utm_source.records[4] == "tiktok_ads"
+
+        # 4. Blank or None name -> returns False without error
+        assert resolve_utm_model_record(mock_utm_source, "") is False
+        assert resolve_utm_model_record(mock_utm_source, None) is False
+
 
