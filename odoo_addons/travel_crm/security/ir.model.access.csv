@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_travel_crm_insight_report_salesman,travel.crm.insight.report.salesman,model_travel_crm_insight_report,sales_team.group_sale_salesman,1,0,0,0
+access_travel_crm_insight_report_manager,travel.crm.insight.report.manager,model_travel_crm_insight_report,sales_team.group_sale_manager,1,0,0,0
+access_travel_crm_insight_report_internal,travel.crm.insight.report.internal,model_travel_crm_insight_report,base.group_user,1,0,0,0

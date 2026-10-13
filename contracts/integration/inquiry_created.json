@@ -44,11 +44,33 @@
         "traveler_count": { "type": "integer", "minimum": 1 }
       }
     },
+    "marketing": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" },
+        "utm_source": { "type": "string" },
+        "utm_medium": { "type": "string" },
+        "utm_campaign": { "type": "string" },
+        "utm_content": { "type": "string" },
+        "utm_term": { "type": "string" },
+        "gclid": { "type": "string" },
+        "fbclid": { "type": "string" },
+        "landing_page": { "type": "string" },
+        "referrer": { "type": "string" }
+      }
+    },
     "source_metadata": {
       "type": "object",
       "properties": {
         "channel": { "type": "string" },
         "campaign": { "type": "string" },
+        "utm_source": { "type": "string" },
+        "utm_medium": { "type": "string" },
+        "utm_campaign": { "type": "string" },
+        "utm_content": { "type": "string" },
+        "utm_term": { "type": "string" },
+        "gclid": { "type": "string" },
+        "fbclid": { "type": "string" },
         "landing_page": { "type": "string" },
         "referrer": { "type": "string" },
         "external_lead_id": { "type": "string" }

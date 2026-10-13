@@ -62,6 +62,102 @@ def parse_statement_csv(csv_text: str, gateway: str = "vnpay"):
     return parsed_records
 
 
+def extract_marketing_attribution(payload):
+    """
+    Extracts canonical marketing attribution from payload with backward-compatible fallback:
+    Priority: payload['marketing'] > payload['source_metadata'] > payload['utm'] > root fields.
+    """
+    if not isinstance(payload, dict):
+        return {}
+
+    marketing_data = payload.get("marketing") or {}
+    source_meta = payload.get("source_metadata") or {}
+    utm_data = payload.get("utm") or {}
+
+    channel = (
+        marketing_data.get("channel")
+        or payload.get("source")
+        or source_meta.get("channel")
+        or "website"
+    )
+    utm_source = (
+        marketing_data.get("utm_source")
+        or source_meta.get("utm_source")
+        or utm_data.get("source")
+        or channel
+    )
+    utm_medium = (
+        marketing_data.get("utm_medium")
+        or source_meta.get("utm_medium")
+        or utm_data.get("medium")
+    )
+    utm_campaign = (
+        marketing_data.get("utm_campaign")
+        or source_meta.get("utm_campaign")
+        or source_meta.get("campaign")
+        or utm_data.get("campaign")
+        or payload.get("campaign")
+    )
+    utm_term = (
+        marketing_data.get("utm_term")
+        or source_meta.get("utm_term")
+        or utm_data.get("term")
+    )
+    utm_content = (
+        marketing_data.get("utm_content")
+        or source_meta.get("utm_content")
+        or utm_data.get("content")
+    )
+    gclid = (
+        marketing_data.get("gclid")
+        or source_meta.get("gclid")
+        or payload.get("gclid")
+    )
+    fbclid = (
+        marketing_data.get("fbclid")
+        or source_meta.get("fbclid")
+        or payload.get("fbclid")
+    )
+    landing_page = (
+        marketing_data.get("landing_page")
+        or source_meta.get("landing_page")
+        or payload.get("landing_page")
+    )
+    referrer = (
+        marketing_data.get("referrer")
+        or source_meta.get("referrer")
+        or payload.get("referrer")
+    )
+
+    return {
+        "channel": str(channel).strip() if channel else "website",
+        "utm_source": str(utm_source).strip() if utm_source else None,
+        "utm_medium": str(utm_medium).strip() if utm_medium else None,
+        "utm_campaign": str(utm_campaign).strip() if utm_campaign else None,
+        "utm_term": str(utm_term).strip() if utm_term else None,
+        "utm_content": str(utm_content).strip() if utm_content else None,
+        "gclid": str(gclid).strip() if gclid else None,
+        "fbclid": str(fbclid).strip() if fbclid else None,
+        "landing_page": str(landing_page).strip() if landing_page else None,
+        "referrer": str(referrer).strip() if referrer else None,
+    }
+
+
+def resolve_utm_model_record(model_env, raw_name):
+    """
+    Finds or creates a UTM model record (utm.source, utm.medium, utm.campaign)
+    using case-insensitive comparison (=ilike) to avoid duplicate records.
+    """
+    if not raw_name or not str(raw_name).strip():
+        return False
+    clean_name = str(raw_name).strip()
+    existing = model_env.search([("name", "=ilike", clean_name)], limit=1)
+    if existing:
+        return existing.id
+    created = model_env.create({"name": clean_name})
+    return created.id
+
+
 class TestPaymentSyncCoreLogic:
     """Host-level unit tests for payment sync crypto, idempotency, and statement parsing."""
 
@@ -463,5 +559,132 @@ VNP_1003,300000000,TCB
 
         # Zero commission rate
         assert compute_commission(2000000.0, 0.0) == 0.0
+
+    def test_marketing_utm_extraction_full_payload(self):
+        """Extracts complete UTM parameters, click IDs, and landing/referrer URLs from marketing block."""
+        payload = {
+            "customer": {"name": "Test Traveler"},
+            "inquiry_type": "tour_booking",
+            "marketing": {
+                "channel": "website",
+                "utm_source": "google_ads",
+                "utm_medium": "cpc",
+                "utm_campaign": "autumn_promotion_2026",
+                "utm_content": "hero_banner_variant_b",
+                "utm_term": "tour du lich ha long 3n2d",
+                "gclid": "Cj0KCQjwx_XnBRDbARIsAPmRR1b_sample_gclid_12345",
+                "fbclid": "IwAR3_sample_fbclid_67890",
+                "landing_page": "https://startravels.vn/tours/ha-long-cruise?utm_source=google_ads",
+                "referrer": "https://www.google.com.vn/",
+            },
+        }
+
+        attr = extract_marketing_attribution(payload)
+        assert attr["channel"] == "website"
+        assert attr["utm_source"] == "google_ads"
+        assert attr["utm_medium"] == "cpc"
+        assert attr["utm_campaign"] == "autumn_promotion_2026"
+        assert attr["utm_content"] == "hero_banner_variant_b"
+        assert attr["utm_term"] == "tour du lich ha long 3n2d"
+        assert attr["gclid"] == "Cj0KCQjwx_XnBRDbARIsAPmRR1b_sample_gclid_12345"
+        assert attr["fbclid"] == "IwAR3_sample_fbclid_67890"
+        assert attr["landing_page"] == "https://startravels.vn/tours/ha-long-cruise?utm_source=google_ads"
+        assert attr["referrer"] == "https://www.google.com.vn/"
+
+    def test_marketing_utm_fallback_precedence(self):
+        """Precedence order: marketing > source_metadata > utm > root fields."""
+        # Case 1: marketing block takes precedence over source_metadata
+        payload_mixed = {
+            "marketing": {
+                "utm_source": "marketing_source",
+                "utm_campaign": "marketing_campaign",
+            },
+            "source_metadata": {
+                "utm_source": "meta_source",
+                "utm_campaign": "meta_campaign",
+                "utm_medium": "meta_medium",
+            },
+        }
+        attr = extract_marketing_attribution(payload_mixed)
+        assert attr["utm_source"] == "marketing_source"
+        assert attr["utm_campaign"] == "marketing_campaign"
+        assert attr["utm_medium"] == "meta_medium"
+
+        # Case 2: source_metadata fallback when marketing is empty
+        payload_meta_only = {
+            "source_metadata": {
+                "channel": "facebook",
+                "utm_source": "fb_ads",
+                "utm_medium": "paid_social",
+                "campaign": "tet_holiday_2027",
+                "gclid": "gclid_from_meta",
+            },
+        }
+        attr2 = extract_marketing_attribution(payload_meta_only)
+        assert attr2["channel"] == "facebook"
+        assert attr2["utm_source"] == "fb_ads"
+        assert attr2["utm_medium"] == "paid_social"
+        assert attr2["utm_campaign"] == "tet_holiday_2027"
+        assert attr2["gclid"] == "gclid_from_meta"
+
+        # Case 3: Complete fallback to legacy root source when no marketing block provided
+        payload_legacy = {
+            "source": "zalo",
+            "message": "Xin chao",
+        }
+        attr3 = extract_marketing_attribution(payload_legacy)
+        assert attr3["channel"] == "zalo"
+        assert attr3["utm_source"] == "zalo"
+        assert attr3["utm_medium"] is None
+        assert attr3["utm_campaign"] is None
+        assert attr3["gclid"] is None
+
+    def test_utm_record_case_insensitive_lookup_and_creation(self):
+        """Auto-discovery resolves existing UTM records ignoring case, creates new if absent."""
+        existing_sources = {1: "Google_Ads", 2: "Facebook", 3: "Direct"}
+
+        class MockUtmModel:
+            def __init__(self, data):
+                self.records = dict(data)
+
+            def search(self, domain, limit=1):
+                field, op, val = domain[0]
+                if op == "=ilike":
+                    for rid, rname in self.records.items():
+                        if rname.lower() == val.lower():
+                            return MockRecord(rid, rname)
+                return MockRecord(None, None)
+
+            def create(self, vals):
+                new_id = max(self.records.keys(), default=0) + 1
+                self.records[new_id] = vals["name"]
+                return MockRecord(new_id, vals["name"])
+
+        class MockRecord:
+            def __init__(self, id, name):
+                self.id = id
+                self.name = name
+
+            def __bool__(self):
+                return self.id is not None
+
+        mock_utm_source = MockUtmModel(existing_sources)
+
+        # 1. Existing with different casing ('google_ads' vs 'Google_Ads')
+        id1 = resolve_utm_model_record(mock_utm_source, "google_ads")
+        assert id1 == 1
+
+        # 2. Existing with whitespace
+        id2 = resolve_utm_model_record(mock_utm_source, "  FACEBOOK  ")
+        assert id2 == 2
+
+        # 3. New record ('tiktok_ads') -> created with id 4
+        id3 = resolve_utm_model_record(mock_utm_source, "tiktok_ads")
+        assert id3 == 4
+        assert mock_utm_source.records[4] == "tiktok_ads"
+
+        # 4. Blank or None name -> returns False without error
+        assert resolve_utm_model_record(mock_utm_source, "") is False
+        assert resolve_utm_model_record(mock_utm_source, None) is False
 
 
