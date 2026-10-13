@@ -191,6 +191,13 @@ jobs:
         run: |
           python -m pytest tests/ -v
 
+      - name: Print E2E and Odoo Logs on Failure
+        if: failure()
+        run: |
+          echo "==================== ODOO SERVER LOGS ===================="
+          docker compose logs --tail=150 odoo || true
+          echo "=========================================================="
+
       - name: Teardown Services
         if: always()
         run: |

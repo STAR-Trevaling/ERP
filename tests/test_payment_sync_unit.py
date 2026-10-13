@@ -62,6 +62,102 @@ def parse_statement_csv(csv_text: str, gateway: str = "vnpay"):
     return parsed_records
 
 
+def extract_marketing_attribution(payload):
+    """
+    Extracts canonical marketing attribution from payload with backward-compatible fallback:
+    Priority: payload['marketing'] > payload['source_metadata'] > payload['utm'] > root fields.
+    """
+    if not isinstance(payload, dict):
+        return {}
+
+    marketing_data = payload.get("marketing") or {}
+    source_meta = payload.get("source_metadata") or {}
+    utm_data = payload.get("utm") or {}
+
+    channel = (
+        marketing_data.get("channel")
+        or payload.get("source")
+        or source_meta.get("channel")
+        or "website"
+    )
+    utm_source = (
+        marketing_data.get("utm_source")
+        or source_meta.get("utm_source")
+        or utm_data.get("source")
+        or channel
+    )
+    utm_medium = (
+        marketing_data.get("utm_medium")
+        or source_meta.get("utm_medium")
+        or utm_data.get("medium")
+    )
+    utm_campaign = (
+        marketing_data.get("utm_campaign")
+        or source_meta.get("utm_campaign")
+        or source_meta.get("campaign")
+        or utm_data.get("campaign")
+        or payload.get("campaign")
+    )
+    utm_term = (
+        marketing_data.get("utm_term")
+        or source_meta.get("utm_term")
+        or utm_data.get("term")
+    )
+    utm_content = (
+        marketing_data.get("utm_content")
+        or source_meta.get("utm_content")
+        or utm_data.get("content")
+    )
+    gclid = (
+        marketing_data.get("gclid")
+        or source_meta.get("gclid")
+        or payload.get("gclid")
+    )
+    fbclid = (
+        marketing_data.get("fbclid")
+        or source_meta.get("fbclid")
+        or payload.get("fbclid")
+    )
+    landing_page = (
+        marketing_data.get("landing_page")
+        or source_meta.get("landing_page")
+        or payload.get("landing_page")
+    )
+    referrer = (
+        marketing_data.get("referrer")
+        or source_meta.get("referrer")
+        or payload.get("referrer")
+    )
+
+    return {
+        "channel": str(channel).strip() if channel else "website",
+        "utm_source": str(utm_source).strip() if utm_source else None,
+        "utm_medium": str(utm_medium).strip() if utm_medium else None,
+        "utm_campaign": str(utm_campaign).strip() if utm_campaign else None,
+        "utm_term": str(utm_term).strip() if utm_term else None,
+        "utm_content": str(utm_content).strip() if utm_content else None,
+        "gclid": str(gclid).strip() if gclid else None,
+        "fbclid": str(fbclid).strip() if fbclid else None,
+        "landing_page": str(landing_page).strip() if landing_page else None,
+        "referrer": str(referrer).strip() if referrer else None,
+    }
+
+
+def resolve_utm_model_record(model_env, raw_name):
+    """
+    Finds or creates a UTM model record (utm.source, utm.medium, utm.campaign)
+    using case-insensitive comparison (=ilike) to avoid duplicate records.
+    """
+    if not raw_name or not str(raw_name).strip():
+        return False
+    clean_name = str(raw_name).strip()
+    existing = model_env.search([("name", "=ilike", clean_name)], limit=1)
+    if existing:
+        return existing.id
+    created = model_env.create({"name": clean_name})
+    return created.id
+
+
 class TestPaymentSyncCoreLogic:
     """Host-level unit tests for payment sync crypto, idempotency, and statement parsing."""
 
@@ -466,8 +562,6 @@ VNP_1003,300000000,TCB
 
     def test_marketing_utm_extraction_full_payload(self):
         """Extracts complete UTM parameters, click IDs, and landing/referrer URLs from marketing block."""
-        from odoo_addons.travel_crm.models.crm_lead import extract_marketing_attribution
-
         payload = {
             "customer": {"name": "Test Traveler"},
             "inquiry_type": "tour_booking",
@@ -499,8 +593,6 @@ VNP_1003,300000000,TCB
 
     def test_marketing_utm_fallback_precedence(self):
         """Precedence order: marketing > source_metadata > utm > root fields."""
-        from odoo_addons.travel_crm.models.crm_lead import extract_marketing_attribution
-
         # Case 1: marketing block takes precedence over source_metadata
         payload_mixed = {
             "marketing": {
@@ -549,8 +641,6 @@ VNP_1003,300000000,TCB
 
     def test_utm_record_case_insensitive_lookup_and_creation(self):
         """Auto-discovery resolves existing UTM records ignoring case, creates new if absent."""
-        from odoo_addons.travel_crm.models.crm_lead import resolve_utm_model_record
-
         existing_sources = {1: "Google_Ads", 2: "Facebook", 3: "Direct"}
 
         class MockUtmModel:
