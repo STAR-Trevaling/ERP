@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from datetime import timedelta
-from odoo import fields
 from odoo.tests.common import TransactionCase
 
 

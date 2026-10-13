@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-import logging
-from odoo import api, fields, models, tools
-
-_logger = logging.getLogger(__name__)
+from odoo import fields, models
 
 
 class TravelCrmInsightReport(models.Model):
@@ -94,7 +90,7 @@ class TravelCrmInsightReport(models.Model):
 
     def init(self):
         """Creates or replaces the analytical database view for high-performance BI reporting."""
-        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute(f"DROP VIEW IF EXISTS {self._table} CASCADE")
         self.env.cr.execute(f"""
             CREATE OR REPLACE VIEW {self._table} AS (
                 SELECT
