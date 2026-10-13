@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Star Travels - CRM & Inquiries",
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.2.0',
     'category': 'Travel/CRM',
     'summary': "Multi-channel Travel Inquiry, Marketing UTM Attribution & Customer Deduplication for Star Travels",
     'description': """
@@ -13,6 +13,7 @@ Star Travels CRM & Inquiry Management
 - Conversion and Ad Click ID tracking (gclid, fbclid, landing_page, referrer).
 - Smart Customer Deduplication (Phone, Email, Public UUID).
 - Inquiries linked directly to Destinations and Places of interest.
+- Executive Sales CRM & Marketing Attribution Insights Dashboard (Pivot, Graph, Funnel, KPI Kanban).
     """,
     'author': "Star Travels ERP Architect",
     'website': "https://star-travels.com",
@@ -24,8 +25,10 @@ Star Travels CRM & Inquiry Management
         'travel_cms',
     ],
     'data': [
+        'security/ir.model.access.csv',
         'views/crm_lead_views.xml',
         'views/res_partner_views.xml',
+        'views/travel_crm_insight_report_views.xml',
     ],
     'installable': True,
     'application': False,

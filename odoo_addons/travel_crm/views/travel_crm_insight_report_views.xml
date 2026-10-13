@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Pivot Matrix View -->
+    <record id="view_travel_crm_insight_report_pivot" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.pivot</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Ma Trận Phân Tích Leads &amp; Marketing Attribution Đa Kênh" sample="1">
+                <field name="source_system" type="row"/>
+                <field name="campaign_id" type="row"/>
+                <field name="create_date" interval="month" type="col"/>
+                <field name="lead_count" type="measure"/>
+                <field name="traveler_count" type="measure"/>
+                <field name="expected_revenue" type="measure"/>
+                <field name="won_revenue" type="measure"/>
+                <field name="probability" type="measure"/>
+                <field name="revenue_per_traveler" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View: Bar Chart -->
+    <record id="view_travel_crm_insight_report_graph_bar" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.graph.bar</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <graph string="Doanh Thu Kỳ Vọng Theo Kênh Tiếp Nhận" type="bar" sample="1">
+                <field name="source_system"/>
+                <field name="expected_revenue" type="measure"/>
+                <field name="won_revenue" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Graph View: Funnel / Stacked Bar -->
+    <record id="view_travel_crm_insight_report_graph_funnel" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.graph.funnel</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <graph string="Phễu Chuyển Đổi Kênh Bán Hàng &amp; Giai Đoạn" type="bar" sample="1">
+                <field name="source_system"/>
+                <field name="stage_id"/>
+                <field name="lead_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Graph View: Destination Demand Pie -->
+    <record id="view_travel_crm_insight_report_graph_destination" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.graph.destination</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <graph string="Thị Phần Nhu Cầu Điểm Đến Du Lịch (Số Khách)" type="pie" sample="1">
+                <field name="destination_interest_id"/>
+                <field name="traveler_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Graph View: Monthly Line Trend -->
+    <record id="view_travel_crm_insight_report_graph_trend" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.graph.trend</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <graph string="Xu Hướng Doanh Thu Thực Chốt (Won Revenue)" type="line" sample="1">
+                <field name="create_date" interval="month"/>
+                <field name="won_revenue" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="view_travel_crm_insight_report_list" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.list</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <list string="Danh Sách Phân Tích Leads &amp; Insights" create="0" edit="0" delete="0">
+                <field name="create_date" string="Ngày Tiếp Nhận"/>
+                <field name="name" string="Tiêu Đề / Nhu Cầu"/>
+                <field name="partner_id" string="Khách Hàng"/>
+                <field name="source_system" widget="badge" string="Kênh"/>
+                <field name="inquiry_type" optional="show"/>
+                <field name="destination_interest_id" optional="show"/>
+                <field name="traveler_count" optional="show" string="Số Khách"/>
+                <field name="campaign_id" optional="show"/>
+                <field name="ad_network" widget="badge" optional="show"/>
+                <field name="stage_id" widget="badge"/>
+                <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="won_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="is_won" widget="boolean" optional="show"/>
+                <field name="user_id" optional="hide"/>
+                <field name="company_currency" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Kanban View with Bento KPI Cards -->
+    <record id="view_travel_crm_insight_report_kanban" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.kanban</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <kanban create="0" class="o_kanban_dashboard" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="source_system"/>
+                <field name="destination_interest_id"/>
+                <field name="traveler_count"/>
+                <field name="expected_revenue"/>
+                <field name="won_revenue"/>
+                <field name="is_won"/>
+                <field name="ad_network"/>
+                <field name="stage_id"/>
+                <field name="company_currency"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex flex-column p-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-truncate fs-6"><field name="name"/></strong>
+                                <span t-if="record.is_won.raw_value" class="badge rounded-pill text-bg-success">🏆 Won</span>
+                                <span t-else="" class="badge rounded-pill text-bg-secondary"><field name="stage_id"/></span>
+                            </div>
+
+                            <div class="text-muted small mb-2" t-if="record.partner_id.raw_value">
+                                <i class="fa fa-user me-1"/> <field name="partner_id"/>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span class="badge rounded-pill text-bg-primary">
+                                    <i class="fa fa-share-alt me-1"/> <field name="source_system"/>
+                                </span>
+                                <span t-if="record.destination_interest_id.raw_value" class="badge rounded-pill text-bg-info">
+                                    <i class="fa fa-map-marker me-1"/> <field name="destination_interest_id"/>
+                                </span>
+                                <span class="badge rounded-pill text-bg-light border text-dark">
+                                    <i class="fa fa-users me-1"/> <field name="traveler_count"/> Pax
+                                </span>
+                                <span t-if="record.ad_network.raw_value and record.ad_network.raw_value != 'organic_direct'" class="badge rounded-pill text-bg-warning text-dark">
+                                    <i class="fa fa-bullhorn me-1"/> <field name="ad_network"/>
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                <span class="small text-muted">Doanh thu kỳ vọng:</span>
+                                <strong class="text-primary fs-6">
+                                    <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                                </strong>
+                            </div>
+                            <div t-if="record.is_won.raw_value" class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="small text-muted">Thực nhận đã chốt:</span>
+                                <strong class="text-success fs-6">
+                                    <field name="won_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                                </strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_travel_crm_insight_report_search" model="ir.ui.view">
+        <field name="name">travel.crm.insight.report.search</field>
+        <field name="model">travel.crm.insight.report</field>
+        <field name="arch" type="xml">
+            <search string="Tìm Kiếm &amp; Phân Tích Insights">
+                <field name="name" string="Tiêu Đề / Yêu Cầu"/>
+                <field name="partner_id" string="Khách Hàng"/>
+                <field name="destination_interest_id" string="Điểm Đến"/>
+                <field name="campaign_id" string="Chiến Dịch UTM"/>
+                <field name="source_id" string="Nguồn UTM"/>
+                <field name="user_id" string="Nhân Viên"/>
+                <field name="utm_term" string="Từ Khóa Ads"/>
+
+                <!-- Filters -->
+                <filter string="🏆 Đã Chốt Đơn (Won)" name="filter_won" domain="[('is_won', '=', True)]"/>
+                <filter string="⏳ Đang Xử Lý (Pipeline)" name="filter_active" domain="[('is_active', '=', True), ('is_won', '=', False)]"/>
+                <filter string="❌ Thất Bại (Lost)" name="filter_lost" domain="[('is_lost', '=', True)]"/>
+                <separator/>
+                <filter string="🌐 Kênh Website" name="filter_website" domain="[('source_system', '=', 'website')]"/>
+                <filter string="📱 Kênh Facebook" name="filter_facebook" domain="[('source_system', '=', 'facebook')]"/>
+                <filter string="💬 Kênh Zalo &amp; Pancake" name="filter_chat" domain="[('source_system', 'in', ['zalo', 'pancake'])]"/>
+                <filter string="🏢 Đối Tác B2B / OTA" name="filter_partner_ota" domain="[('source_system', 'in', ['partner', 'ota'])]"/>
+                <separator/>
+                <filter string="🔍 Google Ads (GCLID)" name="filter_google_ads" domain="[('has_gclid', '=', True)]"/>
+                <filter string="📢 Facebook Ads (FBCLID)" name="filter_fb_ads" domain="[('has_fbclid', '=', True)]"/>
+                <separator/>
+                <filter string="👥 Khách Đoàn (>= 4 Pax)" name="filter_group_pax" domain="[('traveler_count', '&gt;=', 4)]"/>
+                <separator/>
+                <filter string="🗓️ Tháng Này" name="filter_this_month"
+                        domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+                <!-- Group By -->
+                <group expand="1" string="Nhóm Theo (Group By)">
+                    <filter string="Kênh Tiếp Nhận (Source Channel)" name="group_source" context="{'group_by': 'source_system'}"/>
+                    <filter string="Chiến Dịch Marketing (Campaign)" name="group_campaign" context="{'group_by': 'campaign_id'}"/>
+                    <filter string="Mạng Quảng Cáo (Ad Network)" name="group_ad_network" context="{'group_by': 'ad_network'}"/>
+                    <filter string="Điểm Đến Du Lịch (Destination)" name="group_destination" context="{'group_by': 'destination_interest_id'}"/>
+                    <filter string="Loại Nhu Cầu (Inquiry Type)" name="group_inquiry_type" context="{'group_by': 'inquiry_type'}"/>
+                    <filter string="Giai Đoạn Phễu (Stage)" name="group_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Nhân Viên Phụ Trách (Salesperson)" name="group_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Tháng Tiếp Nhận (Month)" name="group_create_month" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION 1: Omnichannel 360° Matrix & Dashboard -->
+    <record id="action_travel_crm_insight_matrix" model="ir.actions.act_window">
+        <field name="name">Tổng Quan Insights Bán Hàng &amp; Marketing 360°</field>
+        <field name="res_model">travel.crm.insight.report</field>
+        <field name="view_mode">pivot,graph,kanban,list</field>
+        <field name="search_view_id" ref="view_travel_crm_insight_report_search"/>
+        <field name="context">{'search_default_filter_active': 1, 'search_default_group_source': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có dữ liệu Leads &amp; Inquiries để phân tích!
+            </p>
+            <p>
+                Dữ liệu sẽ tự động đồng bộ thời gian thực từ Website, Facebook Ads, Zalo, Pancake và OTA.
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION 2: Channel Conversion Funnel -->
+    <record id="action_travel_crm_insight_funnel" model="ir.actions.act_window">
+        <field name="name">Phễu Chuyển Đổi Kênh Bán Hàng (Channel Funnel)</field>
+        <field name="res_model">travel.crm.insight.report</field>
+        <field name="view_mode">graph,pivot,kanban,list</field>
+        <field name="search_view_id" ref="view_travel_crm_insight_report_search"/>
+        <field name="context">{'search_default_group_source': 1, 'search_default_group_stage': 1}</field>
+    </record>
+    <record id="action_travel_crm_insight_funnel_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_travel_crm_insight_report_graph_funnel"/>
+        <field name="act_window_id" ref="action_travel_crm_insight_funnel"/>
+    </record>
+
+    <!-- ACTION 3: Destination Demand & Trends -->
+    <record id="action_travel_crm_insight_destination" model="ir.actions.act_window">
+        <field name="name">Xu Hướng Nhu Cầu Điểm Đến &amp; Tour (Demand Insights)</field>
+        <field name="res_model">travel.crm.insight.report</field>
+        <field name="view_mode">graph,pivot,kanban,list</field>
+        <field name="search_view_id" ref="view_travel_crm_insight_report_search"/>
+        <field name="context">{'search_default_group_destination': 1}</field>
+    </record>
+    <record id="action_travel_crm_insight_destination_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_travel_crm_insight_report_graph_destination"/>
+        <field name="act_window_id" ref="action_travel_crm_insight_destination"/>
+    </record>
+
+    <!-- ACTION 4: Marketing Campaign ROI & Attribution -->
+    <record id="action_travel_crm_insight_attribution" model="ir.actions.act_window">
+        <field name="name">Hiệu Quả Chiến Dịch Marketing &amp; Ad Click (Attribution)</field>
+        <field name="res_model">travel.crm.insight.report</field>
+        <field name="view_mode">pivot,graph,kanban,list</field>
+        <field name="search_view_id" ref="view_travel_crm_insight_report_search"/>
+        <field name="context">{'search_default_group_campaign': 1, 'search_default_group_ad_network': 1}</field>
+    </record>
+
+    <!-- MENUS UNDER CRM REPORTING -->
+    <menuitem id="menu_travel_crm_insights_root"
+              name="Insights Đa Kênh &amp; Marketing Attribution"
+              parent="crm.crm_menu_report"
+              sequence="5"/>
+
+    <menuitem id="menu_travel_crm_insight_matrix"
+              name="📊 Tổng Quan Insights 360°"
+              parent="menu_travel_crm_insights_root"
+              action="action_travel_crm_insight_matrix"
+              sequence="1"/>
+
+    <menuitem id="menu_travel_crm_insight_funnel"
+              name="🎯 Phễu Chuyển Đổi Kênh Bán Hàng"
+              parent="menu_travel_crm_insights_root"
+              action="action_travel_crm_insight_funnel"
+              sequence="2"/>
+
+    <menuitem id="menu_travel_crm_insight_destination"
+              name="📍 Nhu Cầu Điểm Đến &amp; Tour Du Lịch"
+              parent="menu_travel_crm_insights_root"
+              action="action_travel_crm_insight_destination"
+              sequence="3"/>
+
+    <menuitem id="menu_travel_crm_insight_attribution"
+              name="🚀 Hiệu Quả Chiến Dịch UTM &amp; Ads"
+              parent="menu_travel_crm_insights_root"
+              action="action_travel_crm_insight_attribution"
+              sequence="4"/>
+
+</odoo>
